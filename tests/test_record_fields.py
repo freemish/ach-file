@@ -159,6 +159,10 @@ class TestFieldIntegerFieldType(TestCase):
         field_def = FieldDefinition('record_type', IntegerFieldType, length=1)
         self.assertEqual(Field(field_def, "23").value, "3")
 
+    def test_field_int_bad_input(self):
+        field_def = FieldDefinition('record_type', IntegerFieldType, length=1)
+        self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def, "abc")
+
     def test_field_int_autocorrect(self):
         pass
 
@@ -195,3 +199,7 @@ class TestFieldAlphaNumFieldType(TestCase):
     def test_field_alphanum_truncates_trailing(self):
         field_def = FieldDefinition('record_type', AlphaNumFieldType, length=1)
         self.assertEqual(Field(field_def, "23").value, "2")
+
+    def test_field_alphanum_bad_input(self):
+        field_def = FieldDefinition('record_type', AlphaNumFieldType, length=2)
+        self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def, "#freetheevil")

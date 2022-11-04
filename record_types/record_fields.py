@@ -155,6 +155,9 @@ class FieldDefinition:
     
     def correct_input(self, s: str) -> str:
         return self.field_type.correct_input(s)
+    
+    def is_valid(self, s: str, raise_exc: bool = True, *args, **kwargs) -> bool:
+        return self.field_type.is_valid(s, raise_exc=raise_exc, *args, **kwargs)
 
     def get_fixed_width_value(self, s: str) -> str:
         return self.field_type.apply_fixed_length(s, self.length)
@@ -183,8 +186,11 @@ class Field:
     def create_cleaned_value(field_definition: FieldDefinition, value: Optional[str] = None):
         Field._validate_required_value_not_empty(field_definition, value)
         ret_value = str(value or field_definition.default or '')
+
         if field_definition.auto_correct_input:
             ret_value = field_definition.correct_input(ret_value)
+
+        field_definition.is_valid(ret_value, raise_exc=True)
         return field_definition.get_fixed_width_value(ret_value)
     
     @staticmethod
