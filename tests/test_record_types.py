@@ -6,6 +6,7 @@ from record_types.file_header import FileHeaderRecordType
 from record_types.batch_header import BatchHeaderRecordType
 from record_types.entry_detail import EntryDetailRecordType
 from record_types.addenda import AddendaRecordType
+from record_types.batch_control import BatchControlRecordType
 from record_types.record_fields import FieldDefinition, IntegerFieldType, AlphaNumFieldType
 from record_types.record_type_base import RecordType, InvalidRecordSizeError
 
@@ -129,4 +130,15 @@ class TestAddendaRecordType(TestCase):
         self.assertEqual(
             record_line,
             "705Hee hee have my money                                                           00010000001"
+        )
+
+
+class TestBatchControlRecordType(TestCase):
+    def test_batch_control(self):
+        batch_control = BatchControlRecordType(2, 543, 100, 0, 123, 12345678, 1)
+        record_line = batch_control.render_record_line()
+        self.assertEqual(len(record_line), 94)
+        self.assertEqual(
+            record_line,
+            "820000000200000005430000000001000000000000000000000123                         123456780000001"
         )
