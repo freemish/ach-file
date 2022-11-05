@@ -5,6 +5,7 @@ from unittest import TestCase
 from record_types.file_header import FileHeaderRecordType
 from record_types.batch_header import BatchHeaderRecordType
 from record_types.entry_detail import EntryDetailRecordType
+from record_types.addenda import AddendaRecordType
 from record_types.record_fields import FieldDefinition, IntegerFieldType, AlphaNumFieldType
 from record_types.record_type_base import RecordType, InvalidRecordSizeError
 
@@ -117,4 +118,15 @@ class TestEntryDetailRecordType(TestCase):
         self.assertEqual(
             record_line,
             "622123456789123456           0000000100               Testy Testface          1012345670000001"
+        )
+
+
+class TestAddendaRecordType(TestCase):
+    def test_addenda(self):
+        addenda = AddendaRecordType('Hee hee have my money', 1)
+        record_line = addenda.render_record_line()
+        self.assertEqual(len(record_line), 94)
+        self.assertEqual(
+            record_line,
+            "705Hee hee have my money                                                           00010000001"
         )
