@@ -2,15 +2,15 @@
 
 from typing import Dict
 
+from record_types.constants import (
+    ENTRY_DETAIL_DEFAULT_ADDENDA_RECORD_INDICATOR,
+    ENTRY_DETAIL_RECORD_TYPE_CODE
+)
 from record_types.record_fields import (
-    AlphaNumFieldType,
-    FieldDefinition,
-    IntegerFieldType
+    AlphaNumFieldType, FieldDefinition, IntegerFieldType
 )
 from record_types.record_type_base import RecordType
 
-ENTRY_DETAIL_RECORD_TYPE_CODE = 6
-ENTRY_DETAIL_DEFAULT_ADDENDA_RECORD_INDICATOR = 1
 
 class EntryDetailRecordType(RecordType):
     field_definition_dict: Dict[str, FieldDefinition] = {

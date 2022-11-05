@@ -4,7 +4,7 @@ from typing import Dict
 
 from record_types.constants import (
     BATCH_HEADER_DEFAULT_ORIGINATOR_STATUS_CODE,
-    BATCH_HEADER_DEFAULT_SERVICE_CLASS_CODE,
+    BATCH_DEFAULT_SERVICE_CLASS_CODE,
     BATCH_HEADER_DEFAULT_STANDARD_ENTRY_CLASS_CODE,
     BATCH_HEADER_RECORD_TYPE_CODE
 )
@@ -19,7 +19,7 @@ from record_types.record_type_base import RecordType
 class BatchHeaderRecordType(RecordType):
     field_definition_dict: Dict[str, FieldDefinition] = {
         'record_type_code': FieldDefinition('Record Type Code', IntegerFieldType, length=1, default=BATCH_HEADER_RECORD_TYPE_CODE),
-        'service_class_code': FieldDefinition('Service Class Code', IntegerFieldType, length=3, default=BATCH_HEADER_DEFAULT_SERVICE_CLASS_CODE),
+        'service_class_code': FieldDefinition('Service Class Code', IntegerFieldType, length=3, default=BATCH_DEFAULT_SERVICE_CLASS_CODE),
         'company_name': FieldDefinition('Company Name', AlphaNumFieldType, length=16),
         'company_discretionary_data': FieldDefinition('Company Discretionary Data', AlphaNumFieldType, length=20, required=False),
         'company_identification': FieldDefinition('Company Identification Number', IntegerFieldType, length=10),

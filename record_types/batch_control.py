@@ -2,7 +2,10 @@
 
 from typing import Dict
 
-from record_types.constants import BATCH_HEADER_DEFAULT_SERVICE_CLASS_CODE
+from record_types.constants import (
+    BATCH_CONTROL_RECORD_TYPE_CODE,
+    BATCH_DEFAULT_SERVICE_CLASS_CODE
+)
 from record_types.record_fields import (
     AlphaNumFieldType,
     FieldDefinition,
@@ -10,13 +13,13 @@ from record_types.record_fields import (
 )
 from record_types.record_type_base import RecordType
 
-BATCH_CONTROL_RECORD_TYPE_CODE = 8
+
 
 
 class BatchControlRecordType(RecordType):
     field_definition_dict: Dict[str, FieldDefinition] = {
         'record_type_code': FieldDefinition('Record Type Code', IntegerFieldType, length=1, default=BATCH_CONTROL_RECORD_TYPE_CODE),
-        'service_class_code': FieldDefinition('Service Class Code', IntegerFieldType, length=3, default=BATCH_HEADER_DEFAULT_SERVICE_CLASS_CODE),
+        'service_class_code': FieldDefinition('Service Class Code', IntegerFieldType, length=3, default=BATCH_DEFAULT_SERVICE_CLASS_CODE),
         'entry_and_addenda_count': FieldDefinition('Entry and Addenda Count', IntegerFieldType, length=6),
         'entry_hash': FieldDefinition('Entry Hash', IntegerFieldType, length=10),
         'total_debit_amount': FieldDefinition('Total Debit Amount', IntegerFieldType, length=12),
