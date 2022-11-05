@@ -4,6 +4,7 @@ from unittest import TestCase
 
 from record_types.file_header import FileHeaderRecordType
 from record_types.batch_header import BatchHeaderRecordType
+from record_types.entry_detail import EntryDetailRecordType
 from record_types.record_fields import FieldDefinition, IntegerFieldType, AlphaNumFieldType
 from record_types.record_type_base import RecordType, InvalidRecordSizeError
 
@@ -96,4 +97,24 @@ class TestBatchHeaderRecordType(TestCase):
         self.assertEqual(
             record_line,
             "5200Teeniest Fintech                    0000000123PPDPayday          221023   1012345670000002"
+        )
+
+
+class TestEntryDetailRecordType(TestCase):
+    def test_entry_detail_full_trace_number(self):
+        entry_detail = EntryDetailRecordType(22, '123456789', '123456', '100', 'Testy Testface', '012345670000001')
+        record_line = entry_detail.render_record_line()
+        self.assertEqual(len(record_line), 94)
+        self.assertEqual(
+            record_line,
+            "622123456789123456           0000000100               Testy Testface          1012345670000001"
+        )
+    
+    def test_entry_detail_two_part_trace_number(self):
+        entry_detail = EntryDetailRecordType(22, '123456789', '123456', '100', 'Testy Testface', trace_odfi_identifier='01234567', trace_sequence_number=1)
+        record_line = entry_detail.render_record_line()
+        self.assertEqual(len(record_line), 94)
+        self.assertEqual(
+            record_line,
+            "622123456789123456           0000000100               Testy Testface          1012345670000001"
         )
