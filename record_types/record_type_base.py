@@ -55,6 +55,18 @@ class RecordType:
         for field in self.fields.values():
             result += field.value
         return result
+        
+    @classmethod
+    def get_required_kwargs(cls) -> Dict[str, FieldDefinition]:
+        """
+        Get required kwargs that have no defaults set.
+        Returns keys mapped to FieldDefinitions.
+        """
+        required_kwargs = {}
+        for field_def_key, field_def in cls.field_definition_dict.items():
+            if field_def.required and field_def.default is None:
+                required_kwargs[field_def_key] = field_def
+        return required_kwargs
 
     @staticmethod
     def _generate_fields_dict(field_def_dict: Dict, kwargs: Dict) -> Dict[str, Field]:
