@@ -176,14 +176,14 @@ class Field:
     def __init__(self, field_definition: FieldDefinition, value: Optional[str] = None):
         self.field_definition = field_definition
         self.original_value = value
-        self.cleaned_value = Field.create_cleaned_value(field_definition, value)
+        self.cleaned_value = Field._create_cleaned_value(field_definition, value)
     
     @property
     def value(self) -> str:
         return self.cleaned_value
 
     @staticmethod
-    def create_cleaned_value(field_definition: FieldDefinition, value: Optional[str] = None):
+    def _create_cleaned_value(field_definition: FieldDefinition, value: Optional[str] = None):
         Field._validate_required_value_not_empty(field_definition, value)
         ret_value = str(value or field_definition.default or '')
 
