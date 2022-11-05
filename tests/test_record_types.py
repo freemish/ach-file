@@ -3,6 +3,7 @@
 from unittest import TestCase
 
 from record_types.file_header import FileHeaderRecordType
+from record_types.batch_header import BatchHeaderRecordType
 from record_types.record_fields import FieldDefinition, IntegerFieldType, AlphaNumFieldType
 from record_types.record_type_base import RecordType, InvalidRecordSizeError
 
@@ -79,5 +80,20 @@ class TestFileHeaderRecordType(TestCase):
             record_line,
             "101 012345678 123456789221105    A094101The Big Fed            The Little Fintech             "
         )
+        self.assertEqual(file_header.fields['file_creation_date'].cleaned_value, '221105')
+        file_header.fields['file_creation_date'].cleaned_value = '221106'
+        self.assertEqual(
+            file_header.render_record_line(),
+            "101 012345678 123456789221106    A094101The Big Fed            The Little Fintech             "
+        )
 
-        
+
+class TestBatchHeaderRecordType(TestCase):
+    def test_batch_header(self):
+        batch_header = BatchHeaderRecordType('Teeniest Fintech', 123, 'Payday', '01234567', 2, effective_entry_date='221023')
+        record_line = batch_header.render_record_line()
+        self.assertEqual(len(record_line), 94)
+        self.assertEqual(
+            record_line,
+            "5200Teeniest Fintech                    0000000123PPDPayday          221023   1012345670000002"
+        )
