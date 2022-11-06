@@ -10,6 +10,7 @@ from record_types.constants import (
 )
 from record_types.record_fields import (
     AlphaNumFieldType,
+    DateFieldType,
     FieldDefinition,
     IntegerFieldType
 )
@@ -25,14 +26,10 @@ class BatchHeaderRecordType(RecordType):
         'company_identification': FieldDefinition('Company Identification Number', IntegerFieldType, length=10),
         'standard_entry_class_code': FieldDefinition('Standard Entry Class Code', AlphaNumFieldType, length=3, default=BATCH_HEADER_DEFAULT_STANDARD_ENTRY_CLASS_CODE),
         'company_entry_description': FieldDefinition('Company Entry Description', AlphaNumFieldType, length=10),
-        # TODO
-        'company_descriptive_date': FieldDefinition('Company Descriptive Date', AlphaNumFieldType, length=6, required=False),
-        # TODO
-        'effective_entry_date': FieldDefinition('Effective Entry Date', AlphaNumFieldType, length=6),
-        # TODO
+        'company_descriptive_date': FieldDefinition('Company Descriptive Date', DateFieldType, length=6, required=False),
+        'effective_entry_date': FieldDefinition('Effective Entry Date', DateFieldType, length=6),
         'settlement_date': FieldDefinition('Settlement Date', AlphaNumFieldType, length=3, required=False),
         'originator_status_code': FieldDefinition('Originator Status Code', IntegerFieldType, length=1, default=BATCH_HEADER_DEFAULT_ORIGINATOR_STATUS_CODE),
-        # TODO
         'odfi_identification': FieldDefinition('ODFI Identification (Routing Without Final Digit)', IntegerFieldType, length=8),
         'batch_number': FieldDefinition('Batch Number', IntegerFieldType, length=7),
     }

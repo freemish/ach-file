@@ -16,7 +16,6 @@ class EntryDetailRecordType(RecordType):
     field_definition_dict: Dict[str, FieldDefinition] = {
         'record_type_code': FieldDefinition('Record Type Code', IntegerFieldType, length=1, default=ENTRY_DETAIL_RECORD_TYPE_CODE),
         'transaction_code': FieldDefinition('Transaction Code', IntegerFieldType, length=2),
-        # TODO
         'rdfi_routing': FieldDefinition('RDFI Routing Number', IntegerFieldType, length=9),
         'rdfi_account_number': FieldDefinition('RDFI Account Number', AlphaNumFieldType, length=17),
         'amount': FieldDefinition('Transaction Amount Expressed As Cents', IntegerFieldType, length=10),

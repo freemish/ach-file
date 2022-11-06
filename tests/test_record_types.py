@@ -1,5 +1,6 @@
 """Tests record_types.py and other subclasses of RecordType."""
 
+import datetime
 from unittest import TestCase
 
 from record_types.file_header import FileHeaderRecordType
@@ -73,6 +74,16 @@ class TestFileHeaderRecordType(TestCase):
         self.assertEqual(
             record_line,
             "101 012345678 123456789221104    A094101The Big Fed            The Little Fintech             "
+        )
+    
+    def test_file_header_default_now(self):
+        today = datetime.date.today().strftime('%y%m%d')
+        file_header = FileHeaderRecordType('012345678', 123456789, 'The Big Fed', 'The Little Fintech')
+        record_line = file_header.render_record_line()
+        self.assertEqual(len(record_line), 94)
+        self.assertEqual(
+            record_line,
+            "101 012345678 123456789{}    A094101The Big Fed            The Little Fintech             ".format(today)
         )
 
     def test_file_header_tweak_field_definitions(self):

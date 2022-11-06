@@ -13,6 +13,8 @@ from record_types.constants import (
 from record_types.record_fields import (
     AlphaNumFieldType,
     BlankPaddedRoutingNumberFieldType,
+    DateFieldType,
+    TimeFieldType,
     FieldDefinition,
     IntegerFieldType
 )
@@ -25,10 +27,8 @@ class FileHeaderRecordType(RecordType):
         'priority_code': FieldDefinition('Priority Code', IntegerFieldType, length=2, default=FILE_HEADER_PRIORITY_CODE),
         'destination_routing': FieldDefinition('Immediate Destination Routing', BlankPaddedRoutingNumberFieldType, length=10, auto_correct_input=True),
         'origin_routing': FieldDefinition('Immediate Origin Routing', BlankPaddedRoutingNumberFieldType, length=10, auto_correct_input=True),
-        # TODO
-        'file_creation_date': FieldDefinition('File Creation Date', AlphaNumFieldType, length=6),
-        # TODO
-        'file_creation_time': FieldDefinition('File Creation Time', AlphaNumFieldType, length=4, required=False),
+        'file_creation_date': FieldDefinition('File Creation Date', DateFieldType, length=6, auto_correct_input=True, default='now'),
+        'file_creation_time': FieldDefinition('File Creation Time', TimeFieldType, length=4, required=False),
         'file_id_modifier': FieldDefinition('File ID Modifier', AlphaNumFieldType, length=1, default=FILE_HEADER_DEFAULT_FILE_ID_MODIFIER),
         'record size': FieldDefinition('Record Size', IntegerFieldType, length=3, default=RECORD_SIZE),
         'blocking_factor': FieldDefinition('Blocking Factor', IntegerFieldType, length=2, default=FILE_HEADER_BLOCKING_FACTOR),

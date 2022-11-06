@@ -340,7 +340,7 @@ class TestTimeFieldType(TestCase):
         self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def, 'NOW')
 
     def test_field_time_invalid_input(self):
-        cases = ['hi', '190', 190, '21231', 21231, '2022-12-31']
+        cases = ['hi', '190', 190, '21231', 21231, '2022-12-31', '12:31']
         field_def = FieldDefinition('file_time', TimeFieldType, length=4)
         for case in cases:
             self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def, case)
