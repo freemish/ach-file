@@ -163,9 +163,6 @@ class TestFieldIntegerFieldType(TestCase):
         field_def = FieldDefinition('record_type', IntegerFieldType, length=1)
         self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def, "abc")
 
-    def test_field_int_autocorrect(self):
-        pass
-
 
 class TestFieldAlphaNumFieldType(TestCase):
     def test_field_alphanum_default_value_as_string(self):
@@ -203,3 +200,32 @@ class TestFieldAlphaNumFieldType(TestCase):
     def test_field_alphanum_bad_input(self):
         field_def = FieldDefinition('record_type', AlphaNumFieldType, length=2)
         self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def, "#freetheevil")
+
+
+class TestBlankPaddedRoutingNumberFieldType(TestCase):
+    def test_field_valid_str_10_length(self):
+        field_def = FieldDefinition(
+            'routing_num', BlankPaddedRoutingNumberFieldType, length=10, auto_correct_input=True)
+        self.assertEqual(Field(field_def, " 123456789").value, " 123456789")
+    
+    def test_field_valid_str_9_length(self):
+        field_def = FieldDefinition(
+            'routing_num', BlankPaddedRoutingNumberFieldType, length=10, auto_correct_input=True)
+        self.assertEqual(Field(field_def, "123456789").value, " 123456789")
+
+    def test_field_valid_int_9_length(self):
+        field_def = FieldDefinition(
+            'routing_num', BlankPaddedRoutingNumberFieldType, length=10, auto_correct_input=True)
+        self.assertEqual(Field(field_def, 123456789).value, " 123456789")
+    
+    def test_field_autocorrect_invalid_int_8_length(self):
+        field_def = FieldDefinition(
+            'routing_num', BlankPaddedRoutingNumberFieldType, length=10, auto_correct_input=True)
+        self.assertEqual(Field(field_def, 12345678).value, " 012345678")
+
+    def test_field_invalid_input(self):
+        cases = ['1e', 'yours"truly', '1234567890', 1.2]
+        field_def = FieldDefinition(
+            'routing_num', BlankPaddedRoutingNumberFieldType, length=10, auto_correct_input=True)
+        for case in cases:
+            self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def, case)

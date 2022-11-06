@@ -127,6 +127,23 @@ class BlankPaddedRoutingNumberFieldType(IntegerFieldType):
     padding: str = ' '
     regex: re.Pattern = re.compile(r'^\s?\d{9}$')
 
+    @classmethod
+    def correct_input(cls, s: str) -> str:
+        if cls.is_valid(s):
+            return s
+        if s.lstrip().isdigit():
+            return Alignment.RIGHT.align(s, 9, '0')
+        # give up here
+        return s
+
+
+class DateFieldType(FieldType):
+    """Accepts 6 digits representing a valid date or generates a date."""
+
+
+class TimeFieldType(FieldType):
+    """Accepts 4 digits representing military time hours and minutes or generates a time."""
+
 
 class FieldDefinition:
     """
