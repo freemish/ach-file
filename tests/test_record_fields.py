@@ -1,10 +1,11 @@
 """Tests record_fields.py"""
 
+import datetime
 from unittest import TestCase
 
 from record_types.record_fields import (
     Alignment, AlphaNumFieldType, BlankPaddedRoutingNumberFieldType,
-    EmptyRequiredFieldError, Field, FieldDefinition,
+    DateFieldType, EmptyRequiredFieldError, Field, FieldDefinition,
     IntegerFieldType, ValueMismatchesFieldTypeError
 )
 
@@ -229,3 +230,30 @@ class TestBlankPaddedRoutingNumberFieldType(TestCase):
             'routing_num', BlankPaddedRoutingNumberFieldType, length=10, auto_correct_input=True)
         for case in cases:
             self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def, case)
+
+
+class TestDateFieldType(TestCase):
+    def test_field_date_valid_input(self):
+        field_def = FieldDefinition('file_date', DateFieldType, length=6, auto_correct_input=True)
+        self.assertEqual(Field(field_def, '221105').value, '221105')
+    
+    def test_field_date_valid_input_int(self):
+        field_def = FieldDefinition('file_date', DateFieldType, length=6, auto_correct_input=True)
+        self.assertEqual(Field(field_def, 221105).value, '221105')
+    
+    def test_field_date_default_now(self):
+        field_def = FieldDefinition('file_date', DateFieldType, length=6, auto_correct_input=True, default='NOW')
+        self.assertEqual(Field(field_def).value, datetime.date.today().strftime('%y%m%d'))
+
+    def test_field_date_input_now(self):
+        field_def = FieldDefinition('file_date', DateFieldType, length=6, auto_correct_input=True)
+        self.assertEqual(Field(field_def, 'now').value, datetime.date.today().strftime('%y%m%d'))
+
+    def test_field_date_empty(self):
+        field_def = FieldDefinition('file_date', DateFieldType, length=6, auto_correct_input=True, required=False)
+        self.assertEqual(Field(field_def).value, datetime.date.today().strftime(' ' * 6))
+    
+    def test_field_date_required(self):
+        field_def = FieldDefinition('file_date', DateFieldType, length=6, auto_correct_input=True)
+        self.assertRaises(EmptyRequiredFieldError, Field, field_def)
+    

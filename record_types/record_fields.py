@@ -2,6 +2,7 @@
 Fields and FieldType classes.
 """
 
+import datetime
 import re
 from enum import Enum
 from typing import Optional, Union
@@ -129,6 +130,8 @@ class BlankPaddedRoutingNumberFieldType(IntegerFieldType):
 
     @classmethod
     def correct_input(cls, s: str) -> str:
+        if not s:
+            return s
         if cls.is_valid(s):
             return s
         if s.lstrip().isdigit():
@@ -137,8 +140,26 @@ class BlankPaddedRoutingNumberFieldType(IntegerFieldType):
         return s
 
 
-class DateFieldType(FieldType):
-    """Accepts 6 digits representing a valid date or generates a date."""
+class DateFieldType(AlphaNumFieldType):
+    """Accepts 6 digits representing a valid date or generates a date. If not required, pads with blanks."""
+    regex: re.Pattern = re.compile(r'^\d{6}$')
+
+    @classmethod
+    def correct_input(cls, s: str) -> str:
+        if cls.is_valid(s):
+            return s
+        if s.upper() == 'NOW':
+            return datetime.date.today().strftime('%y%m%d')
+        return super().correct_input(s)
+
+    @classmethod
+    def do_validation(cls, s: str, *args, **kwargs) -> Optional[Exception]:
+        if not s:
+            return s
+        exc = super().do_validation(s, *args, **kwargs)
+        if exc:
+            return exc
+        datetime.date(2000 + int(s[:2]), int(s[2:4]), int(s[4:6]))
 
 
 class TimeFieldType(FieldType):
