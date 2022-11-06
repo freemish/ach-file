@@ -4,6 +4,7 @@ Fields and FieldType classes.
 
 import datetime
 import re
+from contextlib import suppress
 from enum import Enum
 from typing import Optional, Union
 
@@ -150,7 +151,14 @@ class DateFieldType(AlphaNumFieldType):
             return s
         if s.upper() == 'NOW':
             return datetime.date.today().strftime('%y%m%d')
-        return super().correct_input(s)
+
+        with suppress(ValueError):
+            return datetime.datetime.fromisoformat(s).strftime('%y%m%d')
+        
+        with suppress(ValueError):
+            return datetime.date.fromisoformat(s).strftime('%y%m%d')
+
+        return s
 
     @classmethod
     def do_validation(cls, s: str, *args, **kwargs) -> Optional[Exception]:
@@ -162,8 +170,33 @@ class DateFieldType(AlphaNumFieldType):
         datetime.date(2000 + int(s[:2]), int(s[2:4]), int(s[4:6]))
 
 
-class TimeFieldType(FieldType):
+class TimeFieldType(AlphaNumFieldType):
     """Accepts 4 digits representing military time hours and minutes or generates a time."""
+    regex: re.Pattern = re.compile(r'^\d{4}$')
+
+    @classmethod
+    def correct_input(cls, s: str) -> str:
+        if cls.is_valid(s):
+            return s
+        if s.upper() == 'NOW':
+            return datetime.datetime.now().strftime('%H%M')
+
+        with suppress(ValueError):
+            return datetime.datetime.fromisoformat(s).strftime('%H%M')
+        
+        with suppress(ValueError):
+            return datetime.date.fromisoformat(s).strftime('%H%M')
+        return s
+    
+    @classmethod
+    def do_validation(cls, s: str, *args, **kwargs) -> Optional[Exception]:
+        if not s:
+            return s
+
+        exc = super().do_validation(s, *args, **kwargs)
+        if exc:
+            return exc
+        datetime.time(int(s[:2]), int(s[2:]))
 
 
 class FieldDefinition:
@@ -223,6 +256,10 @@ class Field:
     @staticmethod
     def _create_cleaned_value(field_definition: FieldDefinition, value: Optional[str] = None):
         Field._validate_required_value_not_empty(field_definition, value)
+
+        ret_value: str = ''
+        if isinstance(value, (datetime.date, datetime.datetime)):
+            ret_value = value.isoformat()
         ret_value = str(value or field_definition.default or '')
 
         if field_definition.auto_correct_input:

@@ -6,7 +6,7 @@ from unittest import TestCase
 from record_types.record_fields import (
     Alignment, AlphaNumFieldType, BlankPaddedRoutingNumberFieldType,
     DateFieldType, EmptyRequiredFieldError, Field, FieldDefinition,
-    IntegerFieldType, ValueMismatchesFieldTypeError
+    IntegerFieldType, TimeFieldType, ValueMismatchesFieldTypeError
 )
 
 
@@ -248,12 +248,99 @@ class TestDateFieldType(TestCase):
     def test_field_date_input_now(self):
         field_def = FieldDefinition('file_date', DateFieldType, length=6, auto_correct_input=True)
         self.assertEqual(Field(field_def, 'now').value, datetime.date.today().strftime('%y%m%d'))
+    
+    def test_field_date_input_date_type(self):
+        field_def = FieldDefinition('file_date', DateFieldType, length=6, auto_correct_input=True)
+        self.assertEqual(Field(field_def, datetime.date(2022, 12, 31)).value, '221231')
+    
+    def test_field_date_input_datetime_type(self):
+        field_def = FieldDefinition('file_date', DateFieldType, length=6, auto_correct_input=True)
+        self.assertEqual(Field(field_def, datetime.datetime(2022, 12, 31, 12, 31, 1)).value, '221231')
 
-    def test_field_date_empty(self):
+    def test_field_date_input_date_isoformat(self):
+        field_def = FieldDefinition('file_date', DateFieldType, length=6, auto_correct_input=True)
+        self.assertEqual(Field(field_def, '2022-12-31').value, '221231')
+    
+    def test_field_date_input_datetime_isoformat(self):
+        field_def = FieldDefinition('file_date', DateFieldType, length=6, auto_correct_input=True)
+        self.assertEqual(Field(field_def, '2022-12-31T12:31:01-07:00').value, '221231')
+
+    def test_field_date_not_required(self):
         field_def = FieldDefinition('file_date', DateFieldType, length=6, auto_correct_input=True, required=False)
         self.assertEqual(Field(field_def).value, datetime.date.today().strftime(' ' * 6))
+    
+    def test_field_date_empty(self):
+        field_def = FieldDefinition('file_date', DateFieldType, length=6, auto_correct_input=True)
+        self.assertEqual(Field(field_def, '').value, datetime.date.today().strftime(' ' * 6))
     
     def test_field_date_required(self):
         field_def = FieldDefinition('file_date', DateFieldType, length=6, auto_correct_input=True)
         self.assertRaises(EmptyRequiredFieldError, Field, field_def)
+
+    def test_field_date_invalid_input_no_autocorrect_default_now(self):
+        field_def = FieldDefinition('file_date', DateFieldType, length=6, default='NOW')
+        self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def)
+
+    def test_field_date_invalid_input_no_autocorrect_now(self):
+        field_def = FieldDefinition('file_date', DateFieldType, length=6)
+        self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def, 'NOW')
+
+    def test_field_date_invalid_input(self):
+        cases = ['hi', '190', '21231', 21231, '1234567', '12345678', 1234567, 2211, '2211']
+        field_def = FieldDefinition('file_date', DateFieldType, length=6)
+        for case in cases:
+            self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def, case)
+
+
+class TestTimeFieldType(TestCase):
+    def test_field_time_not_required(self):
+        field_def = FieldDefinition('file_time', TimeFieldType, length=4, auto_correct_input=True, required=False)
+        self.assertEqual(Field(field_def).value, datetime.date.today().strftime(' ' * 4))
+
+    def test_field_time_empty(self):
+        field_def = FieldDefinition('file_time', TimeFieldType, length=4)
+        self.assertEqual(Field(field_def, '').value, datetime.date.today().strftime(' ' * 4))
     
+    def test_field_time_required(self):
+        field_def = FieldDefinition('file_time', TimeFieldType, length=4)
+        self.assertRaises(EmptyRequiredFieldError, Field, field_def)
+
+    def test_field_time_valid_input(self):
+        field_def = FieldDefinition('file_time', TimeFieldType, length=4, auto_correct_input=True, default='NOW')
+        self.assertEqual(Field(field_def, '2211').value, '2211')
+
+    def test_field_time_input_datetime_type(self):
+        field_def = FieldDefinition('file_time', TimeFieldType, length=4, auto_correct_input=True)
+        self.assertEqual(Field(field_def, datetime.datetime(2022, 12, 31, 12, 31, 1)).value, '1231')
+    
+    def test_field_time_input_datetime_isoformat(self):
+        field_def = FieldDefinition('file_time', TimeFieldType, length=4, auto_correct_input=True)
+        self.assertEqual(Field(field_def, '2022-12-31T12:31:01-07:00').value, '1231')
+    
+    def test_field_time_valid_input_int(self):
+        field_def = FieldDefinition('file_time', TimeFieldType, length=4, auto_correct_input=True)
+        self.assertEqual(Field(field_def, 2211).value, '2211')
+    
+    def test_field_time_default_now(self):
+        field_def = FieldDefinition('file_time', TimeFieldType, length=4, auto_correct_input=True, default='NOW')
+        field_value = Field(field_def).value
+        now_str = datetime.datetime.now().strftime('%H%M')
+        self.assertAlmostEqual(int(field_value), int(now_str), delta=1)
+
+    def test_field_time_input_now(self):
+        field_def = FieldDefinition('file_time', TimeFieldType, length=4, auto_correct_input=True)
+        self.assertEqual(Field(field_def, 'now').value, datetime.datetime.now().strftime('%H%M'))
+
+    def test_field_time_invalid_input_no_autocorrect_default_now(self):
+        field_def = FieldDefinition('file_time', TimeFieldType, length=4, default='NOW')
+        self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def)
+
+    def test_field_time_invalid_input_no_autocorrect_now(self):
+        field_def = FieldDefinition('file_time', TimeFieldType, length=4)
+        self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def, 'NOW')
+
+    def test_field_time_invalid_input(self):
+        cases = ['hi', '190', 190, '21231', 21231, '2022-12-31']
+        field_def = FieldDefinition('file_time', TimeFieldType, length=4)
+        for case in cases:
+            self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def, case)
