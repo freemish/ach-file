@@ -2,6 +2,7 @@
 
 from typing import Dict, List, Optional, Union
 
+from files.file_structure import ACHBatch, ACHFileContents, ACHTransactionEntry
 from record_types import (
     AddendaRecordType, BatchControlRecordType,
     BatchHeaderRecordType, EntryDetailRecordType,
@@ -18,27 +19,29 @@ from record_types.constants import (
     RECORD_SIZE
 )
 
-from files.file_structure import ACHBatch, ACHFileContents, ACHTransactionEntry
-
 
 class ACHFileContentsParser:
     def __init__(self, ach_file_str: str):
         self._raw_str = ach_file_str
-        self.ach_file_contents: Optional[ACHFileContents] = None
-        self.records_list: List[RecordType] = []
 
-    def process_records_list(self) -> None:
-        self.records_list = self.convert_file_string_to_records_list(self._raw_str)
+    def process_records_list(self) -> List[RecordType]:
+        """Processes raw ACH file string into a list of RecordTypes in order."""
+        return self.convert_file_string_to_records_list(self._raw_str)
 
-    def process_ach_file_contents(self) -> None:
-        self.ach_file_contents = self.convert_records_list_to_ach_file_contents(self.records_list)
-
-    @staticmethod
-    def convert_records_list_to_ach_file_contents(records_list: List[RecordType]) -> ACHFileContents:
-        return ACHFileContents(records_list[0], ACHFileContentsParser.convert_sub_records_list_to_ach_batch_list(records_list[1:-1]))
+    def process_ach_file_contents(self, records_list: Optional[List[RecordType]] = None) -> ACHFileContents:
+        """Processes a list of RecordTypes into an ACHFileContents."""
+        return self.convert_records_list_to_ach_file_contents(records_list or self.process_records_list())
 
     @staticmethod
-    def convert_sub_records_list_to_ach_batch_list(records_list: List[RecordType]) -> List[ACHBatch]:
+    def convert_records_list_to_ach_file_contents(records_list: List[RecordType], recalc_control_records: bool = False) -> ACHFileContents:
+        ach_file_contents = ACHFileContents(records_list[0], ACHFileContentsParser._convert_sub_records_list_to_ach_batch_list(
+            records_list[1:-1], recalc_control_records))
+        if not recalc_control_records:
+            ach_file_contents.file_control_record = records_list[-1]
+        return ach_file_contents
+
+    @staticmethod
+    def _convert_sub_records_list_to_ach_batch_list(records_list: List[RecordType], recalc_batch_control: bool = False) -> List[ACHBatch]:
         ach_batch_list: List[ACHBatch] = []
         batch_to_records: Dict[BatchControlRecordType, List[Union[EntryDetailRecordType, AddendaRecordType]]] = {}
         curr_batch_header: Optional[BatchHeaderRecordType] = None
@@ -48,14 +51,17 @@ class ACHFileContentsParser:
                 batch_to_records[curr_batch_header] = []
                 continue
             if record.get_field_value('record_type_code') == str(BATCH_CONTROL_RECORD_TYPE_CODE):
-                tx_entries = ACHFileContentsParser.convert_batch_transaction_record_types_to_ach_transaction_entry_list(batch_to_records[curr_batch_header])
-                ach_batch_list.append(ACHBatch(curr_batch_header, tx_entries))
+                tx_entries = ACHFileContentsParser._convert_batch_transaction_record_types_to_ach_transaction_entry_list(batch_to_records[curr_batch_header])
+                ach_batch = ACHBatch(curr_batch_header, tx_entries)
+                if not recalc_batch_control:
+                    ach_batch.batch_control_record = record
+                ach_batch_list.append(ach_batch)
                 continue
             batch_to_records[curr_batch_header].append(record)
         return ach_batch_list
 
     @staticmethod
-    def convert_batch_transaction_record_types_to_ach_transaction_entry_list(
+    def _convert_batch_transaction_record_types_to_ach_transaction_entry_list(
         records_list: List[Union[EntryDetailRecordType, AddendaRecordType]],
     ) -> List[ACHTransactionEntry]:
         entries: List[ACHTransactionEntry] = []
@@ -72,7 +78,6 @@ class ACHFileContentsParser:
 
         entries.append(ACHTransactionEntry(curr_entry, curr_entry_addendas))
         return entries
-
 
     def get_record_fields_dict_list(self) -> List[Dict[str, str]]:
         dict_list = []

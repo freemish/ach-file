@@ -10,7 +10,6 @@ from record_types.constants import TransactionCode, FILE_HEADER_BLOCKING_FACTOR,
 from record_types.entry_detail import EntryDetailRecordType
 from record_types.file_control import FileControlRecordType
 from record_types.file_header import FileHeaderRecordType
-from record_types.record_type_base import RecordType
 
 
 class ACHFileContents:
@@ -71,6 +70,11 @@ class ACHFileContents:
             return self._file_control_record
         self._file_control_record = self._compute_file_control_record()
         return self._file_control_record
+
+    @file_control_record.setter
+    def file_control_record(self, file_control_record: FileControlRecordType) -> FileControlRecordType:
+        """For use by file parser."""
+        self._file_control_record = file_control_record
 
     def _compute_file_control_record(self) -> FileControlRecordType:
         debit_total, credit_total = self._compute_debit_and_credit_totals()
@@ -147,6 +151,11 @@ class ACHBatch:
             return self._batch_control_record
         self._batch_control_record = self._compute_batch_control_record()
         return self._batch_control_record
+
+    @batch_control_record.setter
+    def batch_control_record(self, batch_control_record: BatchControlRecordType) -> None:
+        """For use by file parser."""
+        self._batch_control_record = batch_control_record
 
     def get_rendered_line_list(self) -> List[str]:
         record_types_list = [self.batch_header_record.render_record_line()]
