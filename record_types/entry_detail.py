@@ -43,6 +43,6 @@ class EntryDetailRecordType(RecordType):
         kwargs['amount'] = amount
         kwargs['individual_name'] = individual_name
         if trace_number is not None:
-            kwargs['trace_odfi_identifier'] = trace_number[:8]
-            kwargs['trace_sequence_number'] = trace_number[8:15]
+            kwargs['trace_odfi_identifier'] = str(trace_number)[:8]
+            kwargs['trace_sequence_number'] = str(trace_number)[8:15]
         super().__init__(**kwargs)
