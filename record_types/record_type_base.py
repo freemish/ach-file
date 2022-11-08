@@ -93,8 +93,11 @@ class RecordType:
             if field_def.required and field_def.default is None:
                 required_kwargs[field_def_key] = field_def
         return required_kwargs
+    
+    def get_field_value(self, field_name: str) -> str:
+        return self.fields[field_name].value
 
-    def set_value_on_field(self, key: str, value: Any, field_def_dict: Optional[Dict] = None, fields_dict: Optional[Dict] = None) -> None:
+    def set_field_value(self, key: str, value: Any, field_def_dict: Optional[Dict] = None, fields_dict: Optional[Dict] = None) -> None:
         """
         Set a new value on a single field after object creation.
         Raises InvalidRecordTypeParametersError if key does not exist in field definitions.
@@ -109,7 +112,7 @@ class RecordType:
             raise InvalidRecordTypeParametersError(type(self).__name__, [key])
         fields_dict[key] = Field(field_def_dict[key], value)
 
-    def set_values_on_fields(self, **kwargs) -> None:
+    def set_field_values(self, **kwargs) -> None:
         """
         Runs set_value_on_field for multiple key-value pairs for convenience, catching errors as it iterates.
         Raises RecordTypeAggregateFieldCreationError at the end if any errors were encountered.
@@ -140,7 +143,7 @@ class RecordType:
         **kwargs
     ) -> None:
         try:
-            self.set_value_on_field(key, value, **kwargs)
+            self.set_field_value(key, value, **kwargs)
         except Exception as e:
             failed_keys.append(key)
             exceptions.append(e)
