@@ -121,7 +121,7 @@ class RecordType:
         for key, value in kwargs.items():
             self._catch_set_value_on_field_errors(failed_keys, exceptions, key, value)
         if failed_keys:
-            raise RecordTypeAggregateFieldCreationError(type(self).__name__, exceptions, failed_keys)
+            raise RecordTypeAggregateFieldCreationError(type(self).__name__, exceptions, failed_keys) from exceptions[0]
 
     def _generate_fields_dict(self, field_def_dict: Dict, kwargs: Dict) -> Dict[str, Field]:
         fields = {}
@@ -131,7 +131,7 @@ class RecordType:
                 failed_keys, exceptions, key, kwargs.get(key),
                 field_def_dict=field_def_dict, fields_dict=fields)
         if exceptions:
-            raise RecordTypeAggregateFieldCreationError(type(self).__name__, exceptions, failed_keys)
+            raise RecordTypeAggregateFieldCreationError(type(self).__name__, exceptions, failed_keys) from exceptions[0]
         return fields
 
     def _catch_set_value_on_field_errors(
