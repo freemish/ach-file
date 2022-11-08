@@ -18,8 +18,8 @@ test_file = """101 123456780 1234567801409020123A094101YOUR BANK              YO
 820000000400370145870000000150000000000022131234567890                         123456780000001
 9000001000001000000040037014587000000015000000000002213                                       
 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
-9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
-"""
+9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"""
+
 
 class TestACHFileContents(TestCase):
     def test_ach_file_contents(self):
@@ -88,9 +88,7 @@ class TestACHFileContents(TestCase):
                 ),
             ],
         )
-        print({x: y.value for x, y in file_contents.file_control_record.fields.items()})
         file_contents_str = file_contents.render_file_contents()
-        print(file_contents_str)
         file_lines = file_contents_str.splitlines()
         test_file_lines = test_file.splitlines()
         for i, line in enumerate(file_lines):
