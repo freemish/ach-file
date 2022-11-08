@@ -260,7 +260,7 @@ class Field:
         ret_value: str = ''
         if isinstance(value, (datetime.date, datetime.datetime)):
             ret_value = value.isoformat()
-        ret_value = str(value or field_definition.default or '')
+        ret_value = str(field_definition.default or '') if value is None else str(value)
 
         if field_definition.auto_correct_input:
             ret_value = field_definition.correct_input(ret_value)
