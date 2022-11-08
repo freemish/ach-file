@@ -62,6 +62,18 @@ class BatchStandardEntryClassCode(enum.Enum):
         return self.name
 
 
+class AutoDateInput(enum.Enum):
+    NOW = ()
+    TOMORROW = ()
+
+    @property
+    def value(self) -> str:
+        return self.name
+
+    def __str__(self) -> str:
+        return self.name
+
+
 RECORD_SIZE = 94
 
 FILE_HEADER_RECORD_TYPE_CODE = 1

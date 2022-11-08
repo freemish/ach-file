@@ -8,6 +8,8 @@ from contextlib import suppress
 from enum import Enum
 from typing import Optional, Union
 
+from record_types.constants import AutoDateInput
+
 
 class ValueMismatchesFieldTypeError(Exception):
     """
@@ -149,8 +151,12 @@ class DateFieldType(AlphaNumFieldType):
     def correct_input(cls, s: str) -> str:
         if cls.is_valid(s):
             return s
-        if s.upper() == 'NOW':
+
+        if s.upper() == AutoDateInput.NOW.value:
             return datetime.date.today().strftime('%y%m%d')
+
+        if s.upper() == AutoDateInput.TOMORROW.value:
+            return (datetime.date.today() + datetime.timedelta(days=1)).strftime('%y%m%d')
 
         with suppress(ValueError):
             return datetime.datetime.fromisoformat(s).strftime('%y%m%d')
@@ -178,8 +184,12 @@ class TimeFieldType(AlphaNumFieldType):
     def correct_input(cls, s: str) -> str:
         if cls.is_valid(s):
             return s
-        if s.upper() == 'NOW':
+
+        if s.upper() == AutoDateInput.NOW.value:
             return datetime.datetime.now().strftime('%H%M')
+        
+        if s.upper() == AutoDateInput.TOMORROW.value:
+            return (datetime.date.today() + datetime.timedelta(days=1)).strftime('%H%M')
 
         with suppress(ValueError):
             return datetime.datetime.fromisoformat(s).strftime('%H%M')

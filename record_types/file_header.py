@@ -3,6 +3,7 @@
 from typing import Dict
 
 from record_types.constants import (
+    AutoDateInput,
     FILE_HEADER_BLOCKING_FACTOR,
     FILE_HEADER_DEFAULT_FILE_ID_MODIFIER,
     FILE_HEADER_FORMAT_CODE,
@@ -27,7 +28,7 @@ class FileHeaderRecordType(RecordType):
         'priority_code': FieldDefinition('Priority Code', IntegerFieldType, length=2, default=FILE_HEADER_PRIORITY_CODE),
         'destination_routing': FieldDefinition('Immediate Destination Routing', BlankPaddedRoutingNumberFieldType, length=10, auto_correct_input=True),
         'origin_routing': FieldDefinition('Immediate Origin Routing', BlankPaddedRoutingNumberFieldType, length=10, auto_correct_input=True),
-        'file_creation_date': FieldDefinition('File Creation Date', DateFieldType, length=6, auto_correct_input=True, default='now'),
+        'file_creation_date': FieldDefinition('File Creation Date', DateFieldType, length=6, auto_correct_input=True, default=AutoDateInput.NOW),
         'file_creation_time': FieldDefinition('File Creation Time', TimeFieldType, length=4, required=False),
         'file_id_modifier': FieldDefinition('File ID Modifier', AlphaNumFieldType, length=1, default=FILE_HEADER_DEFAULT_FILE_ID_MODIFIER),
         'record size': FieldDefinition('Record Size', IntegerFieldType, length=3, default=RECORD_SIZE),
