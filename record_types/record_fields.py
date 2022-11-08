@@ -162,8 +162,8 @@ class DateFieldType(AlphaNumFieldType):
 
     @classmethod
     def do_validation(cls, s: str, *args, **kwargs) -> Optional[Exception]:
-        if not s:
-            return s
+        if not s or not s.strip():
+            return
         exc = super().do_validation(s, *args, **kwargs)
         if exc:
             return exc
