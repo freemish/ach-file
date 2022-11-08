@@ -14,7 +14,8 @@ test_file = """101 123456780 1234567801409020123A094101YOUR BANK              YO
 820000000400370145870000000150000000000022131234567890                         123456780000001
 9000001000001000000040037014587000000015000000000002213                                       
 9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
-9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999"""
+9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
+"""
 
 class TestParser(TestCase):
     def test_parser(self):
@@ -23,13 +24,8 @@ class TestParser(TestCase):
         parser = ACHFileContentsParser(test_file)
         parser.process_records_list()
         parser.process_ach_file_contents()
-        repl_file = '\n'.join([x.render_record_line() for x in parser.records_list])
-        print(repl_file)
         
         for i, record in enumerate(parser.records_list):
             self.assertEqual(record.render_record_line(), test_file_lines[i])
-
-        print()
-        print(parser.ach_file_contents.render_file_contents())
 
         self.assertEqual(parser.ach_file_contents.render_file_contents(), test_file)

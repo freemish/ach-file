@@ -35,7 +35,7 @@ class ACHFileContents:
         record_types_list.append(self.file_control_record.render_record_line())
         return record_types_list
 
-    def render_file_contents(self, line_break: str = '\n') -> str:
+    def render_file_contents(self, line_break: str = '\n', end: str = '\n') -> str:
         rendered_line_list = self.get_rendered_line_list()
         file_contents = line_break.join(rendered_line_list)
 
@@ -44,7 +44,7 @@ class ACHFileContents:
             for _ in range(FILE_HEADER_BLOCKING_FACTOR - block_orphan_count):
                 file_contents += line_break + ('9' * RECORD_SIZE)
 
-        return file_contents
+        return file_contents + end
 
     def set_file_header_record(self, file_header_record: FileHeaderRecordType) -> None:
         self.file_header_record = file_header_record
@@ -162,6 +162,7 @@ class ACHBatch:
             entry_hash=self._compute_entry_hash(),
             total_debit_amount=debit_total,
             total_credit_amount=credit_total,
+            service_class_code=self.batch_header_record.get_field_value('service_class_code'),
             company_identification=self.batch_header_record.get_field_value('company_identification'),
             odfi_identification=self.batch_header_record.get_field_value('odfi_identification'),
             batch_number=self.batch_header_record.get_field_value('batch_number'),
