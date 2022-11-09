@@ -1,7 +1,7 @@
 """Defines ACH file structure and how record types relate."""
 
 from math import ceil
-from typing import List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from record_types.addenda import AddendaRecordType
 from record_types.batch_control import BatchControlRecordType
@@ -44,6 +44,16 @@ class ACHFileContents:
                 file_contents += line_break + ('9' * RECORD_SIZE)
 
         return file_contents + end
+
+    def render_json_dict(self) -> Dict[str, Any]:
+        file_as_json_dict = {
+            'file_header': self.file_header_record.get_field_values(),
+            'batches': [
+                b.get_json_dict() for b in self.batches
+            ],
+            'file_control': self.file_control_record.get_field_values(),
+        }
+        return file_as_json_dict
 
     @property
     def file_header_record(self) -> FileHeaderRecordType:
@@ -131,7 +141,7 @@ class ACHBatch:
         transactions: List[ACHTransactionEntry]
         [computed + cached property] batch_control_record: BatchControlRecordType
     """
-    def __init__(self, batch_header_record: BatchHeaderRecordType, transactions: Optional[List['ACHTransactionEntry']]):
+    def __init__(self, batch_header_record: BatchHeaderRecordType, transactions: Optional[List['ACHTransactionEntry']] = None):
         self.batch_header_record = batch_header_record
         self.transactions = transactions or []
         self._batch_control_record: BatchControlRecordType = None
@@ -174,6 +184,16 @@ class ACHBatch:
             record_types_list.extend(tx.get_rendered_line_list())
         record_types_list.append(self.batch_control_record.render_record_line())
         return record_types_list
+
+    def get_json_dict(self) -> Dict[str, Any]:
+        batch_dict = {
+            'batch_header': self.batch_header_record.get_field_values(),
+            'transactions': [
+                t.get_json_dict() for t in self.transactions
+            ],
+            'batch_control': self.batch_control_record.get_field_values(),
+        }
+        return batch_dict
 
     def _compute_batch_control_record(self) -> BatchControlRecordType:
         debit_total, credit_total = self._compute_debit_and_credit_totals()
@@ -245,3 +265,12 @@ class ACHTransactionEntry:
 
     def get_rendered_line_list(self) -> List[str]:
         return [self.entry.render_record_line()] + [x.render_record_line() for x in self.addendas]
+
+    def get_json_dict(self) -> Dict[str, Any]:
+        tx_dict = {
+            'entry_detail': self.entry.get_field_values(),
+            'addendas': [
+                a.get_field_values() for a in self.addendas
+            ],
+        }
+        return tx_dict
