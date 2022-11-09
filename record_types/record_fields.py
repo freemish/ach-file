@@ -233,6 +233,9 @@ class FieldDefinition:
         self.required = required
         self.default = str(default) if default is not None else None
         self.auto_correct_input = auto_correct_input
+
+    def __repr__(self) -> str:
+        return '<{}: {} [{}]>'.format(type(self).__name__, self.field_name, self.field_type.__name__)
     
     def correct_input(self, s: str) -> str:
         return self.field_type.correct_input(s)
