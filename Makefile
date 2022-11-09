@@ -1,4 +1,8 @@
 # Shortcut commands
 
 test:
-	@python3 -m unittest discover -s tests
+	@coverage run -m unittest discover -s tests
+
+html-report:
+	@coverage html
+	@python -m webbrowser htmlcov/index.html
