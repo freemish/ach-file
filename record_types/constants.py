@@ -42,17 +42,17 @@ class TransactionCode(enum.IntEnum):
 
 
 class BatchStandardEntryClassCode(enum.Enum):
-    PPD = ()
-    ARC = ()
-    BOC = ()
-    CCD = ()
-    CIE = ()
-    CTX = ()
-    IAT = ()
-    POP = ()
-    RCK = ()
-    TEL = ()
-    WEB = ()
+    PPD = enum.auto()
+    ARC = enum.auto()
+    BOC = enum.auto()
+    CCD = enum.auto()
+    CIE = enum.auto()
+    CTX = enum.auto()
+    IAT = enum.auto()
+    POP = enum.auto()
+    RCK = enum.auto()
+    TEL = enum.auto()
+    WEB = enum.auto()
 
     @property
     def value(self) -> str:
@@ -63,8 +63,8 @@ class BatchStandardEntryClassCode(enum.Enum):
 
 
 class AutoDateInput(enum.Enum):
-    NOW = ()
-    TOMORROW = ()
+    NOW = enum.auto()
+    TOMORROW = enum.auto()
 
     @property
     def value(self) -> str:
