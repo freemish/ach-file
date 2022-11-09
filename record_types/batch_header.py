@@ -28,7 +28,7 @@ class BatchHeaderRecordType(RecordType):
         'standard_entry_class_code': FieldDefinition('Standard Entry Class Code', AlphaNumFieldType, length=3, default=BATCH_HEADER_DEFAULT_STANDARD_ENTRY_CLASS_CODE),
         'company_entry_description': FieldDefinition('Company Entry Description', AlphaNumFieldType, length=10),
         'company_descriptive_date': FieldDefinition('Company Descriptive Date', DateFieldType, length=6, required=False),
-        'effective_entry_date': FieldDefinition('Effective Entry Date', DateFieldType, length=6, default=AutoDateInput.TOMORROW),
+        'effective_entry_date': FieldDefinition('Effective Entry Date', DateFieldType, length=6, default=AutoDateInput.TOMORROW, auto_correct_input=True),
         'settlement_date': FieldDefinition('Settlement Date', AlphaNumFieldType, length=3, required=False),
         'originator_status_code': FieldDefinition('Originator Status Code', IntegerFieldType, length=1, default=BATCH_HEADER_DEFAULT_ORIGINATOR_STATUS_CODE),
         'odfi_identification': FieldDefinition('ODFI Identification (Routing Without Final Digit)', IntegerFieldType, length=8),
