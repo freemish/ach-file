@@ -22,7 +22,7 @@ class ACHFileContents:
         [computed property] file_control_record: FileControlRecordType
     """
     def __init__(self, file_header_record: FileHeaderRecordType, batches: Optional[List['ACHBatch']] = None):
-        self.file_header_record = file_header_record
+        self._file_header_record = file_header_record
         self.batches = batches or []
         self._file_control_record = None
         self._recalc_file_control = False
@@ -45,7 +45,12 @@ class ACHFileContents:
 
         return file_contents + end
 
-    def set_file_header_record(self, file_header_record: FileHeaderRecordType) -> None:
+    @property
+    def file_header_record(self) -> FileHeaderRecordType:
+        return self._file_header_record
+
+    @file_header_record.setter
+    def file_header_record(self, file_header_record: FileHeaderRecordType) -> None:
         self.file_header_record = file_header_record
         if self._file_control_record:
             self._recalc_file_control = True
@@ -63,6 +68,12 @@ class ACHFileContents:
         if self._file_control_record:
             self._recalc_file_control = True
         return batch
+
+    def get_all_transactions(self) -> List['ACHTransactionEntry']:
+        txs = []
+        for batch in self.batches:
+            txs.extend(batch.transactions)
+        return txs
 
     @property
     def file_control_record(self) -> FileControlRecordType:
