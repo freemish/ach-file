@@ -1,11 +1,10 @@
 """Defines an ACH file builder."""
 
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List
 
 from record_types import (
-    AddendaRecordType, BatchControlRecordType,
-    BatchHeaderRecordType, EntryDetailRecordType,
-    FileControlRecordType, FileHeaderRecordType
+    AddendaRecordType, BatchHeaderRecordType,
+    EntryDetailRecordType, FileHeaderRecordType
 )
 from record_types.record_fields import FieldDefinition
 
@@ -24,7 +23,7 @@ class ACHFileBuilder:
         Accepts a dict of file settings; run cls.get_file_setting_fields to see all key options.
 
         Examples:
-        ---
+
             settings_dict = {
                 'destination_routing': '012345678',
                 'origin_routing': '102345678',
@@ -33,7 +32,7 @@ class ACHFileBuilder:
                 'file_id_modifier': 'B',
             }
             ACHFileBuilder(**settings_dict)
-        ---
+
             ACHFileBuilder(destination_routing='012345678', origin_routing='102345678', destination_name='YOUR BANK', origin_name='YOUR FINANCIAL INSTITUTION')
         """
         self.ach_file_contents: ACHFileContents = ACHFileContents(FileHeaderRecordType(**file_settings))
@@ -41,6 +40,7 @@ class ACHFileBuilder:
         self.default_odfi_identification: str = file_settings.get('origin_routing', '').lstrip()[:8]
 
     def render(self, line_break: str = '\n', end: str = '\n') -> str:
+        """Renders ACH flat file contents as a string."""
         return self.ach_file_contents.render_file_contents(line_break=line_break, end=end)
 
     def add_batch(self, **batch_settings: Dict[str, Any]) -> 'ACHFileBuilder':
@@ -62,9 +62,18 @@ class ACHFileBuilder:
 
     def add_entries_and_addendas(self, entry_dict_list: List[Dict[str, Any]], batch_index: int = -1,) -> 'ACHFileBuilder':
         """
-        Iterates over a list of entries and their addendas.
+        Iterates over a list of entries and their addendas. Adds them to last added batch in file by default.
 
-        Example: TODO
+        Example:
+            b.add_entries_and_addendas([
+                {'transaction_code': 22, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test',},
+                {'transaction_code': 27, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test', 'addendas': [
+                    {'payment_related_information': 'Reversing the last transaction pls and thx'},
+                ]},
+                {'transaction_code': 22, 'rdfi_routing': '023456789', 'rdfi_account_number': '45656565', 'amount': '7000', 'individual_name': 'Mackey Shawnderson', 'addendas': [
+                    {'payment_related_information': 'Where\'s my money'},
+                ]},
+            ])
         """
         for e in entry_dict_list:
             self.add_entry_and_addenda(batch_index=batch_index, **e)
@@ -72,9 +81,18 @@ class ACHFileBuilder:
 
     def add_entry_and_addenda(self, batch_index: int = -1, **entry_details) -> 'ACHFileBuilder':
         """
-        Adds entry and its addenda(s) to a batch Raises NoBatchForTransactionError or IndexError if batch index specified does not exist.
+        Adds single entry and its addenda(s) to a batch.
+        Raises NoBatchForTransactionError or IndexError if batch index specified does not exist.
 
-        Example: TODO
+        Example:
+            b.add_entry_and_addenda(
+                transaction_code=22,
+                rdfi_routing='123456789',
+                rdfi_account_number='45454545',
+                amount=2000,
+                individual_name='Tester Testerson',
+                addendas=[{'payment_related_information': 'This is a memo'}],
+            )
         """
         if not self.ach_file_contents.batches:
             raise NoBatchForTransactionError("Must add batch before adding transaction entries")
