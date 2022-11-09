@@ -97,6 +97,9 @@ class RecordType:
     def get_field_value(self, field_name: str) -> str:
         return self.fields[field_name].value
 
+    def get_field_values(self) -> Dict[str, str]:
+        return {x: y.value for x, y in self.fields.items()}
+
     def set_field_value(self, key: str, value: Any, field_def_dict: Optional[Dict] = None, fields_dict: Optional[Dict] = None) -> None:
         """
         Set a new value on a single field after object creation.
