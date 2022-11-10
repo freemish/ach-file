@@ -199,40 +199,50 @@ class TestFieldAlphaNumFieldType(TestCase):
         self.assertEqual(Field(field_def, "23").value, "2")
 
     def test_field_alphanum_bad_input(self):
-        field_def = FieldDefinition('record_type', AlphaNumFieldType, length=2)
+        field_def = FieldDefinition('record_type', AlphaNumFieldType, length=2, auto_correct_input=False)
         self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def, "#freetheevil")
+    
+    def test_field_alphanum_bad_input_autocorrect(self):
+        field_def = FieldDefinition('record_type', AlphaNumFieldType, length=5)
+        self.assertEqual(Field(field_def, "#freetheevil").value, "freet")
 
 
 class TestBlankPaddedRoutingNumberFieldType(TestCase):
     def test_field_valid_str_10_length(self):
         field_def = FieldDefinition(
-            'routing_num', BlankPaddedRoutingNumberFieldType, length=10, auto_correct_input=True)
+            'routing_num', BlankPaddedRoutingNumberFieldType, length=10)
         self.assertEqual(Field(field_def, " 123456789").value, " 123456789")
     
     def test_field_valid_str_9_length(self):
         field_def = FieldDefinition(
-            'routing_num', BlankPaddedRoutingNumberFieldType, length=10, auto_correct_input=True)
+            'routing_num', BlankPaddedRoutingNumberFieldType, length=10)
         self.assertEqual(Field(field_def, "123456789").value, " 123456789")
 
     def test_field_valid_int_9_length(self):
         field_def = FieldDefinition(
-            'routing_num', BlankPaddedRoutingNumberFieldType, length=10, auto_correct_input=True)
+            'routing_num', BlankPaddedRoutingNumberFieldType, length=10)
         self.assertEqual(Field(field_def, 123456789).value, " 123456789")
     
     def test_field_autocorrect_invalid_int_8_length(self):
         field_def = FieldDefinition(
-            'routing_num', BlankPaddedRoutingNumberFieldType, length=10, auto_correct_input=True)
+            'routing_num', BlankPaddedRoutingNumberFieldType, length=10)
         self.assertEqual(Field(field_def, 12345678).value, " 012345678")
 
     def test_field_invalid_input(self):
         cases = ['1e', 'yours"truly', '1234567890', 1.2]
         field_def = FieldDefinition(
-            'routing_num', BlankPaddedRoutingNumberFieldType, length=10, auto_correct_input=True)
+            'routing_num', BlankPaddedRoutingNumberFieldType, length=10)
         for case in cases:
             self.assertRaises(ValueMismatchesFieldTypeError, Field, field_def, case)
 
 
 class TestDateFieldType(TestCase):
+    def setUp(self) -> None:
+        DateFieldType.auto_correct = False
+
+    def tearDown(self) -> None:
+        DateFieldType.auto_correct = True
+
     def test_field_date_valid_input(self):
         field_def = FieldDefinition('file_date', DateFieldType, length=6, auto_correct_input=True)
         self.assertEqual(Field(field_def, '221105').value, '221105')
@@ -293,6 +303,12 @@ class TestDateFieldType(TestCase):
 
 
 class TestTimeFieldType(TestCase):
+    def setUp(self) -> None:
+        TimeFieldType.auto_correct = False
+
+    def tearDown(self) -> None:
+        TimeFieldType.auto_correct = True
+
     def test_field_time_not_required(self):
         field_def = FieldDefinition('file_time', TimeFieldType, length=4, auto_correct_input=True, required=False)
         self.assertEqual(Field(field_def).value, datetime.date.today().strftime(' ' * 4))

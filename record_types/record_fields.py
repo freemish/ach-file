@@ -82,6 +82,7 @@ class FieldType:
     padding: str
     alignment: Alignment
     regex: Optional[re.Pattern]
+    auto_correct: bool
 
     @classmethod
     def apply_fixed_length(cls, s: str, length: int) -> str:
@@ -90,8 +91,12 @@ class FieldType:
         return cls.alignment.truncate(s, length)
 
     @classmethod
-    def correct_input(cls, s: str) -> str:
-        """TODO: Correct input to only contain characters that would pass regex check."""
+    def should_correct_input(cls, auto_correct_override: Optional[bool]) -> bool:
+        return auto_correct_override if auto_correct_override is not None else cls.auto_correct
+
+    @classmethod
+    def correct_input(cls, s: str, auto_correct_override: Optional[bool] = None) -> str:
+        """Correct input to only contain characters that would pass regex check."""
         return s
 
     @classmethod
@@ -117,6 +122,7 @@ class IntegerFieldType(FieldType):
     padding: str = '0'
     alignment: Alignment = Alignment.RIGHT
     regex: re.Pattern = re.compile(r'^\d+$')
+    auto_correct: bool = False
 
 
 class AlphaNumFieldType(FieldType):
@@ -124,31 +130,49 @@ class AlphaNumFieldType(FieldType):
     padding: str = ' '
     alignment: Alignment = Alignment.LEFT
     regex: re.Pattern = re.compile(r'^[A-Za-z0-9./()&\'\s-]+$')
+    auto_correct: bool = True
+
+    @classmethod
+    def correct_input(cls, s: str, auto_correct_override: Optional[bool] = None) -> str:
+        """
+        Replaces all characters not present in class's regex pattern with an empty string.
+        """
+        if not cls.should_correct_input(auto_correct_override):
+            return s
+        return re.sub( re.compile(r'[^A-Za-z0-9./()&\'\s-]'), '', s)
 
 
 class BlankPaddedRoutingNumberFieldType(IntegerFieldType):
     """Represents a routing number padded with a leading blank space."""
     padding: str = ' '
     regex: re.Pattern = re.compile(r'^\s?\d{9}$')
+    auto_correct: bool = True
 
     @classmethod
-    def correct_input(cls, s: str) -> str:
-        if not s:
+    def correct_input(cls, s: str, auto_correct_override: Optional[bool] = None) -> str:
+        if not cls.should_correct_input(auto_correct_override):
             return s
+        if not cls.auto_correct:
+            return s
+        if not s:
+            return ''
         if cls.is_valid(s):
             return s
         if s.lstrip().isdigit():
             return Alignment.RIGHT.align(s, 9, '0')
-        # give up here
         return s
 
 
 class DateFieldType(AlphaNumFieldType):
     """Accepts 6 digits representing a valid date or generates a date. If not required, pads with blanks."""
     regex: re.Pattern = re.compile(r'^\d{6}$')
+    auto_correct: bool = True
 
     @classmethod
-    def correct_input(cls, s: str) -> str:
+    def correct_input(cls, s: str, auto_correct_override: Optional[bool]) -> str:
+        if not cls.should_correct_input(auto_correct_override):
+            return s
+
         if cls.is_valid(s):
             return s
 
@@ -179,9 +203,13 @@ class DateFieldType(AlphaNumFieldType):
 class TimeFieldType(AlphaNumFieldType):
     """Accepts 4 digits representing military time hours and minutes or generates a time."""
     regex: re.Pattern = re.compile(r'^\d{4}$')
+    auto_correct: bool = True
 
     @classmethod
-    def correct_input(cls, s: str) -> str:
+    def correct_input(cls, s: str, auto_correct_override: Optional[bool] = None) -> str:
+        if not cls.should_correct_input(auto_correct_override):
+            return s
+
         if cls.is_valid(s):
             return s
 
@@ -222,10 +250,11 @@ class FieldDefinition:
         default: Optional[str] -- if no value is provided to Field, defines what is automatically set
             as the Field's value
     """
-    def __init__(self, field_name: str, field_type: FieldType, length: int,
+    def __init__(
+            self, field_name: str, field_type: FieldType, length: int,
             required: bool = True,
             default: Optional[Union[str, int]] = None,
-            auto_correct_input: bool = False,
+            auto_correct_input: Optional[bool] = None,
         ):
         self.field_name = field_name
         self.field_type = field_type
@@ -238,7 +267,7 @@ class FieldDefinition:
         return '<{}: {} [{}]>'.format(type(self).__name__, self.field_name, self.field_type.__name__)
     
     def correct_input(self, s: str) -> str:
-        return self.field_type.correct_input(s)
+        return self.field_type.correct_input(s, self.auto_correct_input)
     
     def is_valid(self, s: str, raise_exc: bool = True, *args, **kwargs) -> bool:
         return self.field_type.is_valid(s, raise_exc=raise_exc, *args, **kwargs)
@@ -275,8 +304,7 @@ class Field:
             ret_value = value.isoformat()
         ret_value = str(field_definition.default or '') if value is None else str(value)
 
-        if field_definition.auto_correct_input:
-            ret_value = field_definition.correct_input(ret_value)
+        ret_value = field_definition.correct_input(ret_value)
 
         field_definition.is_valid(ret_value, raise_exc=True)
         return field_definition.get_fixed_width_value(ret_value)
