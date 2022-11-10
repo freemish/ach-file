@@ -2,7 +2,7 @@
 
 from unittest import TestCase
 
-from files.file_parser import ACHFileContentsParser
+from ach.files import ACHFileContentsParser
 
 
 test_file = """101 123456780 1234567801409020123A094101YOUR BANK              YOUR COMPANY                   

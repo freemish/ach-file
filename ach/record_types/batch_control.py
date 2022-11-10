@@ -2,18 +2,16 @@
 
 from typing import Dict
 
-from record_types.constants import (
+from .constants import (
     BATCH_CONTROL_RECORD_TYPE_CODE,
     BATCH_DEFAULT_SERVICE_CLASS_CODE
 )
-from record_types.record_fields import (
+from .record_fields import (
     AlphaNumFieldType,
     FieldDefinition,
     IntegerFieldType
 )
-from record_types.record_type_base import RecordType
-
-
+from .record_type_base import RecordType
 
 
 class BatchControlRecordType(RecordType):

@@ -2,20 +2,20 @@
 
 from typing import Dict
 
-from record_types.constants import AutoDateInput
-from record_types.constants import (
+from .constants import AutoDateInput
+from .constants import (
     BATCH_HEADER_DEFAULT_ORIGINATOR_STATUS_CODE,
     BATCH_DEFAULT_SERVICE_CLASS_CODE,
     BATCH_HEADER_DEFAULT_STANDARD_ENTRY_CLASS_CODE,
     BATCH_HEADER_RECORD_TYPE_CODE
 )
-from record_types.record_fields import (
+from .record_fields import (
     AlphaNumFieldType,
     DateFieldType,
     FieldDefinition,
     IntegerFieldType
 )
-from record_types.record_type_base import RecordType
+from .record_type_base import RecordType
 
 
 class BatchHeaderRecordType(RecordType):

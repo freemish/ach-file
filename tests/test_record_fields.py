@@ -3,7 +3,7 @@
 import datetime
 from unittest import TestCase
 
-from record_types.record_fields import (
+from ach.record_types.record_fields import (
     Alignment, AlphaNumFieldType, BlankPaddedRoutingNumberFieldType,
     DateFieldType, EmptyRequiredFieldError, Field, FieldDefinition,
     IntegerFieldType, TimeFieldType, ValueMismatchesFieldTypeError

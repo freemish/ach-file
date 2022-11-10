@@ -2,7 +2,7 @@
 
 from typing import Dict
 
-from record_types.constants import (
+from .constants import (
     AutoDateInput,
     FILE_HEADER_BLOCKING_FACTOR,
     FILE_HEADER_DEFAULT_FILE_ID_MODIFIER,
@@ -11,7 +11,7 @@ from record_types.constants import (
     FILE_HEADER_RECORD_TYPE_CODE,
     RECORD_SIZE
 )
-from record_types.record_fields import (
+from .record_fields import (
     AlphaNumFieldType,
     BlankPaddedRoutingNumberFieldType,
     DateFieldType,
@@ -19,7 +19,7 @@ from record_types.record_fields import (
     FieldDefinition,
     IntegerFieldType
 )
-from record_types.record_type_base import RecordType
+from .record_type_base import RecordType
 
 
 class FileHeaderRecordType(RecordType):

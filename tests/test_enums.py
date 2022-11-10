@@ -2,7 +2,7 @@
 
 from unittest import TestCase
 
-from record_types.constants import (
+from ach.record_types.constants import (
     AutoDateInput, BatchServiceClassCode, BatchStandardEntryClassCode, TransactionCode
 )
 

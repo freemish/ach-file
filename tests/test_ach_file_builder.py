@@ -2,9 +2,8 @@
 
 from unittest import TestCase
 
-from files.file_builder import ACHFileBuilder, NoBatchForTransactionError
-from files.file_parser import ACHFileContentsParser
-from record_types import BatchHeaderRecordType, EntryDetailRecordType, AddendaRecordType, AutoDateInput, BatchStandardEntryClassCode
+from ach.files import ACHFileBuilder, ACHFileContentsParser, NoBatchForTransactionError
+from ach.record_types import AddendaRecordType, BatchHeaderRecordType, EntryDetailRecordType, AutoDateInput, BatchStandardEntryClassCode
 
 
 test_file = """101 123456780 1234567801409020123A094101YOUR BANK              YOUR COMPANY                   

@@ -3,14 +3,14 @@
 import datetime
 from unittest import TestCase
 
-from record_types.file_header import FileHeaderRecordType
-from record_types.batch_header import BatchHeaderRecordType
-from record_types.entry_detail import EntryDetailRecordType
-from record_types.addenda import AddendaRecordType
-from record_types.batch_control import BatchControlRecordType
-from record_types.file_control import FileControlRecordType
-from record_types.record_fields import FieldDefinition, IntegerFieldType, AlphaNumFieldType
-from record_types.record_type_base import RecordType, InvalidRecordSizeError
+from ach.record_types import (
+    AddendaRecordType, AlphaNumFieldType,
+    BatchControlRecordType, BatchHeaderRecordType,
+    EntryDetailRecordType, FieldDefinition,
+    FileControlRecordType, FileHeaderRecordType,
+    IntegerFieldType, InvalidRecordSizeError,
+    RecordType
+)
 
 
 class TestRecordType(TestCase):

@@ -2,14 +2,14 @@
 
 from typing import Dict, List, Optional, Union
 
-from files.file_structure import ACHBatch, ACHFileContents, ACHTransactionEntry
-from record_types import (
+from .file_structure import ACHBatch, ACHFileContents, ACHTransactionEntry
+from ..record_types import (
     AddendaRecordType, BatchControlRecordType,
     BatchHeaderRecordType, EntryDetailRecordType,
     FileControlRecordType, FileHeaderRecordType
 )
-from record_types.record_type_base import RecordType
-from record_types.constants import (
+from ..record_types.record_type_base import RecordType
+from ..record_types.constants import (
     ADDENDA_RECORD_TYPE_CODE,
     BATCH_CONTROL_RECORD_TYPE_CODE,
     BATCH_HEADER_RECORD_TYPE_CODE,

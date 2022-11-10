@@ -2,14 +2,14 @@
 
 from typing import Dict
 
-from record_types.constants import (
+from .constants import (
     ENTRY_DETAIL_DEFAULT_ADDENDA_RECORD_INDICATOR,
     ENTRY_DETAIL_RECORD_TYPE_CODE
 )
-from record_types.record_fields import (
+from .record_fields import (
     AlphaNumFieldType, FieldDefinition, IntegerFieldType
 )
-from record_types.record_type_base import RecordType
+from .record_type_base import RecordType
 
 
 class EntryDetailRecordType(RecordType):

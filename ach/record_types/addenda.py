@@ -2,17 +2,17 @@
 
 from typing import Dict
 
-from record_types.constants import (
+from .constants import (
     ADDENDA_DEFAULT_SEQUENCE_NUMBER,
     ADDENDA_RECORD_TYPE_CODE,
     ADDENDA_TYPE_CODE
 )
-from record_types.record_fields import (
+from .record_fields import (
     AlphaNumFieldType,
     FieldDefinition,
     IntegerFieldType
 )
-from record_types.record_type_base import RecordType
+from .record_type_base import RecordType
 
 
 class AddendaRecordType(RecordType):

@@ -2,7 +2,8 @@
 Defines base RecordType class. Validates FieldDefinition arrays and instantiates Fields.
 """
 
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
+
 from .constants import RECORD_SIZE
 from .record_fields import Field, FieldDefinition
 

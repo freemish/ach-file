@@ -2,13 +2,12 @@
 
 from typing import Any, Dict, List
 
-from record_types import (
+from ..record_types import (
     AddendaRecordType, BatchHeaderRecordType,
-    EntryDetailRecordType, FileHeaderRecordType
+    EntryDetailRecordType, FieldDefinition,
+    FileHeaderRecordType
 )
-from record_types.record_fields import FieldDefinition
-
-from files.file_structure import ACHBatch, ACHFileContents, ACHTransactionEntry
+from .file_structure import ACHBatch, ACHFileContents, ACHTransactionEntry
 
 
 class NoBatchForTransactionError(Exception):

@@ -2,13 +2,13 @@
 
 from typing import Dict
 
-from record_types.constants import FILE_CONTROL_RECORD_TYPE_CODE
-from record_types.record_fields import (
+from .constants import FILE_CONTROL_RECORD_TYPE_CODE
+from .record_fields import (
     AlphaNumFieldType,
     FieldDefinition,
     IntegerFieldType
 )
-from record_types.record_type_base import RecordType
+from .record_type_base import RecordType
 
 
 class FileControlRecordType(RecordType):
