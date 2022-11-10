@@ -70,9 +70,6 @@ class ACHFileContents:
         if self._file_control_record:
             self._recalc_file_control = True
 
-    def get_batches(self) -> List['ACHBatch']:
-        return self.batches
-
     def remove_batch_by_index(self, index: int) -> 'ACHBatch':
         batch = self.batches.pop(index)
         if self._file_control_record:
@@ -156,9 +153,6 @@ class ACHBatch:
         self.transactions.append(transaction)
         if self._batch_control_record:
             self._recalc_batch_control = True
-
-    def get_transactions(self) -> List['ACHTransactionEntry']:
-        return self.transactions
     
     def remove_transaction_by_index(self, index: int) -> 'ACHTransactionEntry':
         transaction = self.transactions.pop(index)
