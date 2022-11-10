@@ -2,9 +2,9 @@
 
 from unittest import TestCase
 
-from files.file_builder import ACHFileBuilder
+from files.file_builder import ACHFileBuilder, NoBatchForTransactionError
 from files.file_parser import ACHFileContentsParser
-from record_types import BatchHeaderRecordType, EntryDetailRecordType, AddendaRecordType
+from record_types import BatchHeaderRecordType, EntryDetailRecordType, AddendaRecordType, AutoDateInput, BatchStandardEntryClassCode
 
 
 test_file = """101 123456780 1234567801409020123A094101YOUR BANK              YOUR COMPANY                   
@@ -89,14 +89,17 @@ class TestACHFileBuilder(TestCase):
         self.ach_file_builder_class = ACHFileBuilder
         return super().setUp()
 
-    def test_ach_file_builder(self):
+    def test_ach_file_builder_result_passes_parser(self):
         b = self.ach_file_builder_class(
             destination_routing='012345678',
             origin_routing='102345678',
             destination_name='YOUR BANK',
             origin_name='YOUR FINANCIAL INSTITUTION',
         )
-        b.add_batch(company_name='YOUR COMPANY', company_identification='1234567890', company_entry_description='Test', effective_entry_date='TOMORROW')
+        b.add_batch(
+            company_name='YOUR COMPANY', company_identification='1234567890', company_entry_description='Test',
+            effective_entry_date=AutoDateInput.TOMORROW, standard_entry_class_code=BatchStandardEntryClassCode.CCD,
+        )
         b.add_entries_and_addendas([
             {'transaction_code': 22, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test',},
             {'transaction_code': 27, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test', 'addendas': [
@@ -106,10 +109,57 @@ class TestACHFileBuilder(TestCase):
                 {'payment_related_information': 'Where\'s my money'},
             ]},
         ])
-        print(b.render())
-        print(b.ach_file_contents.render_json_dict())
+        
+        parser = ACHFileContentsParser(b.render())
+        ach_file_contents = parser.process_ach_file_contents(parser.process_records_list())
+        self.assertEqual(b.render(), ach_file_contents.render_file_contents())
+        self.assertDictEqual(b.ach_file_contents.render_json_dict(), ach_file_contents.render_json_dict())
 
-    def test_ach_file_builder_result_passes_parser(self):
+    def test_ach_file_builder_multiple_batches_result_passes_parser(self):
+        b = self.ach_file_builder_class(
+            destination_routing='012345678',
+            origin_routing='102345678',
+            destination_name='YOUR BANK',
+            origin_name='YOUR FINANCIAL INSTITUTION',
+        )
+        b.add_batch(
+            company_name='YOUR COMPANY', company_identification='1234567890', company_entry_description='Test',
+            effective_entry_date=AutoDateInput.TOMORROW, standard_entry_class_code=BatchStandardEntryClassCode.CCD,
+        )
+        b.add_entries_and_addendas([
+            {'transaction_code': 22, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test',},
+            {'transaction_code': 27, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test', 'addendas': [
+                {'payment_related_information': 'Reversing the last transaction pls and thx'},
+            ]},
+            {'transaction_code': 22, 'rdfi_routing': '023456789', 'rdfi_account_number': '45656565', 'amount': '7000', 'individual_name': 'Mackey Shawnderson', 'addendas': [
+                {'payment_related_information': 'Where\'s my money'},
+            ]},
+        ])
+        b.add_batch(
+            company_name='YOUR COMPANY', company_identification='1234567890', company_entry_description='Test 2',
+            effective_entry_date=AutoDateInput.TOMORROW, standard_entry_class_code=BatchStandardEntryClassCode.PPD,
+        )
+        b.add_entries_and_addendas([
+            {'transaction_code': 22, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test',},
+            {'transaction_code': 27, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test', 'addendas': [
+                {'payment_related_information': 'Reversing the last transaction pls and thx'},
+            ]},
+            {'transaction_code': 22, 'rdfi_routing': '023456789', 'rdfi_account_number': '45656565', 'amount': '7000', 'individual_name': 'Mackey Shawnderson', 'addendas': [
+                {'payment_related_information': 'Where\'s my money'},
+            ]},
+        ])
+        
+        parser = ACHFileContentsParser(b.render())
+        ach_file_contents = parser.process_ach_file_contents(parser.process_records_list())
+        json_dict = b.ach_file_contents.render_json_dict()
+        self.assertEqual(b.render(), ach_file_contents.render_file_contents())
+        self.assertDictEqual(b.ach_file_contents.render_json_dict(), ach_file_contents.render_json_dict())
+
+        self.assertEqual(int(json_dict['file_control']['batch_count']), 2)
+        self.assertEqual(int(json_dict['file_control']['entry_and_addenda_count']), 10)
+        self.assertEqual(int(json_dict['file_control']['entry_hash']), int(json_dict['batches'][0]['batch_control']['entry_hash']) * 2)
+
+    def test_ach_file_builder_build_from_parser_output(self):
         parser = ACHFileContentsParser(test_file)
         ach_file_contents = parser.process_ach_file_contents(parser.process_records_list())
 
@@ -127,7 +177,55 @@ class TestACHFileBuilder(TestCase):
         self.assertEqual(test_file, builder.render())
 
     def test_add_transaction_before_batch(self):
-        pass
+        b = self.ach_file_builder_class(
+            destination_routing='012345678',
+            origin_routing='102345678',
+            destination_name='YOUR BANK',
+            origin_name='YOUR FINANCIAL INSTITUTION',
+        )
+        with self.assertRaises(NoBatchForTransactionError):
+            b.add_entries_and_addendas([
+                {'transaction_code': 22, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test',},
+                {'transaction_code': 27, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test', 'addendas': [
+                    {'payment_related_information': 'Reversing the last transaction pls and thx'},
+                ]},
+                {'transaction_code': 22, 'rdfi_routing': '023456789', 'rdfi_account_number': '45656565', 'amount': '7000', 'individual_name': 'Mackey Shawnderson', 'addendas': [
+                    {'payment_related_information': 'Where\'s my money'},
+                ]},
+            ])
+        with self.assertRaises(NoBatchForTransactionError):
+            b.add_entry_and_addenda(
+                **{'transaction_code': 27, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test', 'addendas': [
+                    {'payment_related_information': 'Reversing the last transaction pls and thx'},
+                ]}
+            )
 
-    def tets_add_transaction_to_nonexistent_batch(self):
-        pass
+    def test_add_transaction_to_nonexistent_batch(self):
+        b = self.ach_file_builder_class(
+            destination_routing='012345678',
+            origin_routing='102345678',
+            destination_name='YOUR BANK',
+            origin_name='YOUR FINANCIAL INSTITUTION',
+        )
+        b.add_batch(
+            company_name='YOUR COMPANY', company_identification='1234567890', company_entry_description='Test',
+            effective_entry_date=AutoDateInput.TOMORROW, standard_entry_class_code=BatchStandardEntryClassCode.CCD,
+        )
+        with self.assertRaises(IndexError):
+            b.add_entries_and_addendas([
+                {'transaction_code': 22, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test',},
+                {'transaction_code': 27, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test', 'addendas': [
+                    {'payment_related_information': 'Reversing the last transaction pls and thx'},
+                ]},
+                {'transaction_code': 22, 'rdfi_routing': '023456789', 'rdfi_account_number': '45656565', 'amount': '7000', 'individual_name': 'Mackey Shawnderson', 'addendas': [
+                    {'payment_related_information': 'Where\'s my money'},
+                ],},
+            ], batch_index=1)
+
+        with self.assertRaises(IndexError):
+            b.add_entry_and_addenda(
+                batch_index=1,
+                **{'transaction_code': 27, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test', 'addendas': [
+                    {'payment_related_information': 'Reversing the last transaction pls and thx'},
+                ]}
+            )
