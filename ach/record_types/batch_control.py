@@ -2,7 +2,7 @@
 
 from typing import Dict
 
-from .constants import (
+from ..constants import (
     BATCH_CONTROL_RECORD_TYPE_CODE,
     BATCH_DEFAULT_SERVICE_CLASS_CODE
 )

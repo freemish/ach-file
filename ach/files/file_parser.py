@@ -9,7 +9,7 @@ from ..record_types import (
     FileControlRecordType, FileHeaderRecordType
 )
 from ..record_types.record_type_base import RecordType
-from ..record_types.constants import (
+from ..constants import (
     ADDENDA_RECORD_TYPE_CODE,
     BATCH_CONTROL_RECORD_TYPE_CODE,
     BATCH_HEADER_RECORD_TYPE_CODE,

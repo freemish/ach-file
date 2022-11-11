@@ -3,13 +3,12 @@
 from math import ceil
 from typing import Any, Dict, List, Optional, Tuple
 
+from ..constants import FILE_HEADER_BLOCKING_FACTOR, RECORD_SIZE, TransactionCode
 from ..record_types import (
     AddendaRecordType, BatchControlRecordType,
     BatchHeaderRecordType, EntryDetailRecordType,
-    FileControlRecordType, FileHeaderRecordType,
-    TransactionCode
+    FileControlRecordType, FileHeaderRecordType
 )
-from ..record_types.constants import FILE_HEADER_BLOCKING_FACTOR, RECORD_SIZE
 
 
 class ACHFileContents:

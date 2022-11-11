@@ -2,7 +2,7 @@
 
 from typing import Dict
 
-from .constants import (
+from ..constants import (
     ADDENDA_DEFAULT_SEQUENCE_NUMBER,
     ADDENDA_RECORD_TYPE_CODE,
     ADDENDA_TYPE_CODE

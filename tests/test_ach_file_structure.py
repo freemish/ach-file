@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from ach.files import ACHBatch, ACHFileContents, ACHTransactionEntry
 from ach.record_types import AddendaRecordType, BatchHeaderRecordType, EntryDetailRecordType, FileHeaderRecordType
-from ach.record_types.constants import RECORD_SIZE
+from ach.constants import RECORD_SIZE
 
 test_file = """101 123456780 1234567801409020123A094101YOUR BANK              YOUR COMPANY                   
 5200YOUR COMPANY                        1234567890PPDPAYROLL         140903   1123456780000001

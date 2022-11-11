@@ -3,7 +3,8 @@
 from unittest import TestCase
 
 from ach.files import ACHFileBuilder, ACHFileContentsParser, NoBatchForTransactionError
-from ach.record_types import AddendaRecordType, BatchHeaderRecordType, EntryDetailRecordType, AutoDateInput, BatchStandardEntryClassCode
+from ach.record_types import AddendaRecordType, BatchHeaderRecordType, EntryDetailRecordType
+from ach.constants import AutoDateInput, BatchStandardEntryClassCode, TransactionCode
 
 
 test_file = """101 123456780 1234567801409020123A094101YOUR BANK              YOUR COMPANY                   
@@ -100,14 +101,36 @@ class TestACHFileBuilder(TestCase):
             effective_entry_date=AutoDateInput.TOMORROW, standard_entry_class_code=BatchStandardEntryClassCode.CCD,
         )
         b.add_entries_and_addendas([
-            {'transaction_code': 22, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test',},
-            {'transaction_code': 27, 'rdfi_routing': '123456789', 'rdfi_account_number': '65656565', 'amount': '300', 'individual_name': 'Janey Test', 'addendas': [
-                {'payment_related_information': 'Reversing the last transaction pls and thx'},
-            ]},
-            {'transaction_code': 22, 'rdfi_routing': '023456789', 'rdfi_account_number': '45656565', 'amount': '7000', 'individual_name': 'Mackey Shawnderson', 'addendas': [
-                {'payment_related_information': 'Where\'s my money'},
-            ]},
+            {
+                'transaction_code': TransactionCode.CHECKING_CREDIT,
+                'rdfi_routing': '123456789',
+                'rdfi_account_number': '65656565',
+                'amount': '300',
+                'individual_name': 'Janey Test',
+            },
+            {
+                'transaction_code': 27,
+                'rdfi_routing': '123456789',
+                'rdfi_account_number': '65656565',
+                'amount': '300',
+                'individual_name': 'Janey Test',
+                'addendas': [
+                    {'payment_related_information': 'Reversing the last transaction pls and thx'},
+                ],
+            },
+            {
+                'transaction_code': 22,
+                'rdfi_routing': '023456789',
+                'rdfi_account_number': '45656565',
+                'amount': '7000',
+                'individual_name': 'Mackey Shawnderson',
+                'addendas': [
+                    {'payment_related_information': 'Where\'s my money'},
+                ],
+            },
         ])
+
+        print('"{}"'.format(b.render()))
         
         parser = ACHFileContentsParser(b.render())
         ach_file_contents = parser.process_ach_file_contents(parser.process_records_list())

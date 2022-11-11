@@ -2,7 +2,7 @@
 
 from typing import Dict
 
-from .constants import FILE_CONTROL_RECORD_TYPE_CODE
+from ..constants import FILE_CONTROL_RECORD_TYPE_CODE
 from .record_fields import (
     AlphaNumFieldType,
     FieldDefinition,

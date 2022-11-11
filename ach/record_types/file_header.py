@@ -2,7 +2,7 @@
 
 from typing import Dict
 
-from .constants import (
+from ..constants import (
     AutoDateInput,
     FILE_HEADER_BLOCKING_FACTOR,
     FILE_HEADER_DEFAULT_FILE_ID_MODIFIER,

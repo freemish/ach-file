@@ -2,7 +2,7 @@
 
 from typing import Dict
 
-from .constants import (
+from ..constants import (
     ENTRY_DETAIL_DEFAULT_ADDENDA_RECORD_INDICATOR,
     ENTRY_DETAIL_RECORD_TYPE_CODE
 )

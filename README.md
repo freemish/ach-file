@@ -7,7 +7,7 @@ Here is an example of how to use the file builder:
 
 ```
 from ach.files import ACHFileBuilder
-from ach.record_types.constants import AutoDateInput, BatchStandardEntryClassCode, TransactionCode
+from ach.constants import AutoDateInput, BatchStandardEntryClassCode, TransactionCode
 
 
 b = ACHFileBuilder(

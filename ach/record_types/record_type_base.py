@@ -4,7 +4,7 @@ Defines base RecordType class. Validates FieldDefinition arrays and instantiates
 
 from typing import Any, Dict, List, Optional
 
-from .constants import RECORD_SIZE
+from ..constants import RECORD_SIZE
 from .record_fields import Field, FieldDefinition
 
 
