@@ -9,6 +9,9 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
     steps:
     - uses: actions/checkout@v3
     - name: Install dependencies
@@ -16,4 +19,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install coverage
     - name: Run check
-      run: make test
+      run: |
+        make test
+        coverage report
+    - name: Report code coverage to codecov
+      uses: codecov/codecov-action@v3.1.1
+
