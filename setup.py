@@ -5,7 +5,7 @@ setup(
     name='ach-file',
     author='Molly Gouletas',
     author_email='molly.gouletas@gmail.com',
-    version='0.1.4',
+    version='0.1.4.beta',
     packages=find_packages(exclude=['tests']),
     url='https://github.com/freemish/ach-file',
     license='MIT License',
