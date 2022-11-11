@@ -1,4 +1,7 @@
 # ach-file
+
+[![codecov](https://codecov.io/github/freemish/ach-file/branch/main/graph/badge.svg?token=F9BFHNSRJV)](https://codecov.io/github/freemish/ach-file)
+
 Generates ACH files. Highly configurable and permissive enough to be able to generate a valid ACH file for any originating bank.
 
 ## Example
