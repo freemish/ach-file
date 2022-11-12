@@ -19,7 +19,7 @@ class EntryDetailRecordType(RecordType):
         'record_type_code': FieldDefinition('Record Type Code', IntegerFieldType, length=1, default=ENTRY_DETAIL_RECORD_TYPE_CODE),
         'transaction_code': FieldDefinition('Transaction Code', IntegerFieldType, length=2),
         'rdfi_routing': FieldDefinition('RDFI Routing Number', IntegerFieldType, length=9),
-        'rdfi_account_number': FieldDefinition('RDFI Account Number', AlphaNumFieldType, length=17),
+        'rdfi_account_number': FieldDefinition('RDFI Account Number', AlphaNumFieldType, length=17, auto_correct_input=False),
         'amount': FieldDefinition('Transaction Amount Expressed As Cents', IntegerFieldType, length=10),
         'individual_identification_number': FieldDefinition('Individual Identification Number (Alphanumeric)', AlphaNumFieldType, length=15, required=False),
         'individual_name': FieldDefinition('Individual Name', AlphaNumFieldType, length=22),
