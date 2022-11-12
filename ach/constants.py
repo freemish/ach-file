@@ -32,16 +32,31 @@ class TransactionCode(enum.IntEnum):
     SAVINGS_DEBIT = 37
     SAVINGS_DEBIT_PRENOTE = 38
 
+    @classmethod
+    def _missing_(cls, value):
+        return cls._create_pseudo_member_(value)
+
+    # pylint: disable=attribute-defined-outside-init
+    @classmethod
+    def _create_pseudo_member_(cls, value):
+        pseudo_member = cls._value2member_map_.get(value, None)
+        if pseudo_member is None:
+            new_member = int.__new__(cls, value)
+            new_member._name_ = f'UNKNOWN_{value}'
+            new_member._value_ = value
+            pseudo_member = cls._value2member_map_.setdefault(value, new_member)
+        return pseudo_member
+
     def __str__(self) -> str:
         return str(self.value)
 
     def is_credit(self) -> bool:
         """Return True if TransactionCode credits the account, else False"""
-        return self.value % 10 in [2, 3]
+        return self.value % 10 < 5
 
     def is_debit(self) -> bool:
         """Return True if TransactionCode debits the account, else False"""
-        return self.value % 10 in [7, 8]
+        return self.value % 10 >= 5
 
     def is_prenote(self) -> bool:
         """Return True if TransactionCode is only a dry-run transaction (prenote), else False"""

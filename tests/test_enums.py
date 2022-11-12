@@ -31,8 +31,8 @@ class TestTransactionCode(TestCase):
             else:
                 self.assertFalse(result, e)
 
-    def test_not_transaction_code(self):
-        self.assertRaises(ValueError, TransactionCode, 56)
+    def test_not_transaction_code_still_allowed(self):
+        TransactionCode(56)
 
 
 class TestAutoDateInput(TestCase):
