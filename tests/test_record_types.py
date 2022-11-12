@@ -158,7 +158,17 @@ class TestBatchControlRecordType(TestCase):
 
 class TestFileControlRecordType(TestCase):
     def test_file_control(self):
-        file_control = FileControlRecordType(1, 1, 2, 543, 100, 0)
+        """
+        batch_count: int,
+        block_count: int,
+        entry_and_addenda_count: int,
+        entry_hash: int,
+        total_debit_amount: int,
+        total_credit_amount: int,
+        """
+        file_control = FileControlRecordType(
+            batch_count=1, block_count=1, entry_and_addenda_count=2,
+            entry_hash=543, total_debit_amount=100, total_credit_amount=0)
         record_line = file_control.render_record_line()
         self.assertEqual(len(record_line), 94)
         self.assertEqual(
