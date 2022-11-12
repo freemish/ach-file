@@ -106,10 +106,10 @@ class ACHFileContents:
         )
 
     def _compute_entry_and_addenda_count(self) -> int:
-        return sum([int(x.batch_control_record.get_field_value('entry_and_addenda_count')) for x in self.batches])
+        return sum(int(x.batch_control_record.get_field_value('entry_and_addenda_count')) for x in self.batches)
 
     def _compute_entry_hash(self) -> int:
-        return sum([int(x.batch_control_record.get_field_value('entry_hash')) for x in self.batches])
+        return sum(int(x.batch_control_record.get_field_value('entry_hash')) for x in self.batches)
 
     def _compute_line_count(self, entry_addenda_count: Optional[int] = None) -> int:
         if entry_addenda_count is None:
@@ -123,8 +123,8 @@ class ACHFileContents:
 
     def _compute_debit_and_credit_totals(self) -> Tuple[int, int]:
         debit_sum, credit_sum = 0, 0
-        debit_sum = sum([int(x.batch_control_record.get_field_value('total_debit_amount')) for x in self.batches])
-        credit_sum = sum([int(x.batch_control_record.get_field_value('total_credit_amount')) for x in self.batches])
+        debit_sum = sum(int(x.batch_control_record.get_field_value('total_debit_amount')) for x in self.batches)
+        credit_sum = sum(int(x.batch_control_record.get_field_value('total_credit_amount')) for x in self.batches)
         return debit_sum, credit_sum
 
 
@@ -202,14 +202,14 @@ class ACHBatch:
         )
 
     def _compute_entry_hash(self) -> int:
-        return sum([x.get_entry_hash_int() for x in self.transactions])
+        return sum(x.get_entry_hash_int() for x in self.transactions)
 
     def _compute_entry_and_addenda_count(self) -> int:
-        return sum([x.get_entry_and_addenda_count() for x in self.transactions])
+        return sum(x.get_entry_and_addenda_count() for x in self.transactions)
 
     def _compute_debit_and_credit_totals(self) -> Tuple[int, int]:
-        debit_total = sum([x.get_debit_amount() for x in self.transactions])
-        credit_total = sum([x.get_credit_amount() for x in self.transactions])
+        debit_total = sum(x.get_debit_amount() for x in self.transactions)
+        credit_total = sum(x.get_credit_amount() for x in self.transactions)
         return debit_total, credit_total
 
 
