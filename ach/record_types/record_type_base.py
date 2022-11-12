@@ -176,7 +176,6 @@ class RecordType:
     ) -> None:
         try:
             self.set_field_value(key, value, **kwargs)
-        # pylint: disable=broad-except
         except Exception as exc:
             failed_keys.append(key)
             exceptions.append(exc)

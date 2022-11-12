@@ -1,0 +1,2 @@
+[MASTER]
+disable=consider-using-f-string,broad-except
