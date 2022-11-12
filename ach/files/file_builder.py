@@ -1,6 +1,6 @@
 """Defines an ACH file builder."""
 
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Tuple
 
 from ..record_types import (
     AddendaRecordType, BatchHeaderRecordType,
@@ -74,10 +74,14 @@ class ACHFileBuilder:
         self,
         entry_dict_list: List[Dict[str, Any]],
         batch_index: int = -1,
-    ) -> 'ACHFileBuilder':
+        raise_exc: bool = True,
+    ) -> List[Tuple[Dict[str, Any], Exception]]:
         """
         Iterates over a list of entries and their addendas.
         Adds them to last added batch in file by default.
+
+        If not raise_exc, catches exceptions and returns
+        failed entry_dicts along with exceptions inside a list.
 
         Example:
             b.add_entries_and_addendas([
@@ -110,9 +114,15 @@ class ACHFileBuilder:
                 },
             ])
         """
+        failed_entry_dicts_and_excs = []
         for entry_dict in entry_dict_list:
-            self.add_entry_and_addenda(batch_index=batch_index, **entry_dict)
-        return self
+            try:
+                self.add_entry_and_addenda(batch_index=batch_index, **entry_dict)
+            except Exception as exc:
+                if raise_exc:
+                    raise exc from exc
+                failed_entry_dicts_and_excs.append((entry_dict, exc))
+        return failed_entry_dicts_and_excs
 
     def add_entry_and_addenda(self, batch_index: int = -1, **entry_details) -> 'ACHFileBuilder':
         """
