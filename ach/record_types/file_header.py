@@ -22,7 +22,9 @@ from .record_fields import (
 from .record_type_base import RecordType
 
 
+# pylint: disable=line-too-long
 class FileHeaderRecordType(RecordType):
+    """Defines all fields of a file header record line of an ACH file."""
     field_definition_dict: Dict[str, FieldDefinition] = {
         'record_type_code': FieldDefinition('Record Type Code', IntegerFieldType, length=1, default=FILE_HEADER_RECORD_TYPE_CODE),
         'priority_code': FieldDefinition('Priority Code', IntegerFieldType, length=2, default=FILE_HEADER_PRIORITY_CODE),

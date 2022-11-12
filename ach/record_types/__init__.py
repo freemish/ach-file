@@ -1,3 +1,5 @@
+"""Defines all lines and line components of an ACH file structure."""
+
 from .addenda import AddendaRecordType
 from .batch_control import BatchControlRecordType
 from .batch_header import BatchHeaderRecordType

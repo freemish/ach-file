@@ -14,7 +14,7 @@ from ..constants import AutoDateInput
 class ValueMismatchesFieldTypeError(Exception):
     """
     Raised when a string mismatches a FieldType.
-    
+
     Attributes:
         msg_format: str -- Message containing "{}" to indicate where string arguments
             can be formatted dynamically on instantiation
@@ -55,26 +55,35 @@ class Alignment(Enum):
     LEFT = 0
     RIGHT = 1
 
-    def align(self, s: str, length: int, padding: str) -> str:
+    def align(self, input_string: str, length: int, padding: str) -> str:
+        """
+        Aligns text to the left or right of a given string length,
+        using padding to fill any gaps if input string is shorter than length.
+        """
         justify_method = {
             Alignment.LEFT: str.ljust,
             Alignment.RIGHT: str.rjust,
         }.get(self)
-        return justify_method(s, length, padding)
+        return justify_method(input_string, length, padding)
 
-    def truncate(self, s: str, length: int) -> str:
+    def truncate(self, input_string: str, length: int) -> str:
+        """
+        Truncates a string longer than length to equal length.
+        If left-aligned, truncates right side; if right-aligned,
+        truncates left side.
+        """
         if self == Alignment.LEFT:
-            return s[:length]
-        return s[-length:]
+            return input_string[:length]
+        return input_string[-length:]
 
 
 class FieldType:
     """
     Base class for FieldType.
-    
+
     Attributes:
         padding: str -- Filler for fixed-width string
-        alignment: Alignment -- Original string should be oriented 
+        alignment: Alignment -- Original string should be oriented
             either left or right in fixed-width string
         regex: Optional[re.Pattern] -- pattern against which original string
             should be validated
@@ -85,23 +94,34 @@ class FieldType:
     auto_correct: bool
 
     @classmethod
-    def apply_fixed_length(cls, s: str, length: int) -> str:
+    def apply_fixed_length(cls, input_string: str, length: int) -> str:
         """Adds padding for short strings and truncates long ones."""
-        s = cls.alignment.align(s, length, cls.padding)
-        return cls.alignment.truncate(s, length)
+        input_string = cls.alignment.align(input_string, length, cls.padding)
+        return cls.alignment.truncate(input_string, length)
 
     @classmethod
     def should_correct_input(cls, auto_correct_override: Optional[bool]) -> bool:
+        """Return True if auto_correct is True, else False if input is not to be changed."""
         return auto_correct_override if auto_correct_override is not None else cls.auto_correct
 
+    # pylint: disable=unused-argument
     @classmethod
-    def correct_input(cls, s: str, auto_correct_override: Optional[bool] = None) -> str:
+    def correct_input(cls, input_string: str, auto_correct_override: Optional[bool] = None) -> str:
         """Correct input to only contain characters that would pass regex check."""
-        return s
+        return input_string
 
     @classmethod
-    def is_valid(cls, s: str, raise_exc: bool = False, *args, **kwargs) -> bool:
-        exc = cls.do_validation(s, *args, **kwargs)
+    def is_valid(cls, input_string: str, *args, raise_exc: bool = False, **kwargs) -> bool:
+        """
+        Returns True if input is valid, else False.
+        Raises exc instead of return False if raise_exc.
+        """
+        exc = None
+        try:
+            cls.do_validation(input_string, *args, **kwargs)
+        except Exception as validation_exc:
+            exc = validation_exc
+
         if not exc:
             return True
         if not raise_exc:
@@ -109,12 +129,15 @@ class FieldType:
         raise exc
 
     @classmethod
-    def do_validation(cls, s: str, *args, **kwargs) -> Optional[Exception]:
+    def do_validation(cls, input_string: str, *args, **kwargs) -> None:
+        """
+        Validates input string. If invalid, raises exception, else returns None.
+        """
         if not cls.regex:
-            return None
-        is_match = s == getattr(re.match(cls.regex, s), 'string', '')
+            return
+        is_match = input_string == getattr(re.match(cls.regex, input_string), 'string', '')
         if not is_match:
-            return ValueMismatchesFieldTypeError(s, cls.regex.pattern or cls.__name__)
+            raise ValueMismatchesFieldTypeError(input_string, cls.regex.pattern or cls.__name__)
 
 
 class IntegerFieldType(FieldType):
@@ -133,13 +156,13 @@ class AlphaNumFieldType(FieldType):
     auto_correct: bool = True
 
     @classmethod
-    def correct_input(cls, s: str, auto_correct_override: Optional[bool] = None) -> str:
+    def correct_input(cls, input_string: str, auto_correct_override: Optional[bool] = None) -> str:
         """
         Replaces all characters not present in class's regex pattern with an empty string.
         """
         if not cls.should_correct_input(auto_correct_override):
-            return s
-        return re.sub( re.compile(r'[^A-Za-z0-9./()&\'\s-]'), '', s)
+            return input_string
+        return re.sub( re.compile(r'[^A-Za-z0-9./()&\'\s-]'), '', input_string)
 
 
 class BlankPaddedRoutingNumberFieldType(IntegerFieldType):
@@ -149,92 +172,96 @@ class BlankPaddedRoutingNumberFieldType(IntegerFieldType):
     auto_correct: bool = True
 
     @classmethod
-    def correct_input(cls, s: str, auto_correct_override: Optional[bool] = None) -> str:
+    def correct_input(cls, input_string: str, auto_correct_override: Optional[bool] = None) -> str:
         if not cls.should_correct_input(auto_correct_override):
-            return s
+            return input_string
         if not cls.auto_correct:
-            return s
-        if not s:
+            return input_string
+        if not input_string:
             return ''
-        if cls.is_valid(s):
-            return s
-        if s.lstrip().isdigit():
-            return Alignment.RIGHT.align(s, 9, '0')
-        return s
+        if cls.is_valid(input_string):
+            return input_string
+        if input_string.lstrip().isdigit():
+            return Alignment.RIGHT.align(input_string, 9, '0')
+        return input_string
 
 
 class DateFieldType(AlphaNumFieldType):
-    """Accepts 6 digits representing a valid date or generates a date. If not required, pads with blanks."""
+    """
+    Accepts 6 digits representing a valid date OR generates a date
+    given a datetime.date, a datetime.datetime, or an AutoDateInput string.
+    If not required, pads with blanks.
+    """
     regex: re.Pattern = re.compile(r'^\d{6}$')
     auto_correct: bool = True
 
     @classmethod
-    def correct_input(cls, s: str, auto_correct_override: Optional[bool]) -> str:
-        if not cls.should_correct_input(auto_correct_override):
-            return s
+    def correct_input(cls, input_string: str, auto_correct_override: Optional[bool] = None) -> str:
+        if not cls.should_correct_input(auto_correct_override) or cls.is_valid(input_string):
+            return input_string
 
-        if cls.is_valid(s):
-            return s
-
-        if s.upper() == AutoDateInput.NOW.value:
+        if input_string.upper() == AutoDateInput.NOW.value:
             return datetime.date.today().strftime('%y%m%d')
 
-        if s.upper() == AutoDateInput.TOMORROW.value:
+        if input_string.upper() == AutoDateInput.TOMORROW.value:
             return (datetime.date.today() + datetime.timedelta(days=1)).strftime('%y%m%d')
 
         with suppress(ValueError):
-            return datetime.datetime.fromisoformat(s).strftime('%y%m%d')
-        
-        with suppress(ValueError):
-            return datetime.date.fromisoformat(s).strftime('%y%m%d')
+            return datetime.datetime.fromisoformat(input_string).strftime('%y%m%d')
 
-        return s
+        with suppress(ValueError):
+            return datetime.date.fromisoformat(input_string).strftime('%y%m%d')
+
+        return input_string
 
     @classmethod
-    def do_validation(cls, s: str, *args, **kwargs) -> Optional[Exception]:
-        if not s or not s.strip():
+    def do_validation(cls, input_string: str, *args, **kwargs) -> None:
+        if not input_string or not input_string.strip():
             return
-        exc = super().do_validation(s, *args, **kwargs)
-        if exc:
-            return exc
-        datetime.date(2000 + int(s[:2]), int(s[2:4]), int(s[4:6]))
+        try:
+            super().do_validation(input_string, *args, **kwargs)
+        except Exception as exc:
+            raise exc from exc
+        datetime.date(2000 + int(input_string[:2]), int(input_string[2:4]), int(input_string[4:6]))
 
 
 class TimeFieldType(AlphaNumFieldType):
-    """Accepts 4 digits representing military time hours and minutes or generates a time."""
+    """
+    Accepts 4 digits representing military time hours and minutes
+    OR generates a time given a datetime.datetime or AutoDateInput string.
+    """
     regex: re.Pattern = re.compile(r'^\d{4}$')
     auto_correct: bool = True
 
     @classmethod
-    def correct_input(cls, s: str, auto_correct_override: Optional[bool] = None) -> str:
-        if not cls.should_correct_input(auto_correct_override):
-            return s
+    def correct_input(cls, input_string: str, auto_correct_override: Optional[bool] = None) -> str:
+        if not cls.should_correct_input(auto_correct_override) or cls.is_valid(input_string):
+            return input_string
 
-        if cls.is_valid(s):
-            return s
-
-        if s.upper() == AutoDateInput.NOW.value:
+        if input_string.upper() == AutoDateInput.NOW.value:
             return datetime.datetime.now().strftime('%H%M')
-        
-        if s.upper() == AutoDateInput.TOMORROW.value:
+
+        if input_string.upper() == AutoDateInput.TOMORROW.value:
             return (datetime.date.today() + datetime.timedelta(days=1)).strftime('%H%M')
 
         with suppress(ValueError):
-            return datetime.datetime.fromisoformat(s).strftime('%H%M')
-        
-        with suppress(ValueError):
-            return datetime.date.fromisoformat(s).strftime('%H%M')
-        return s
-    
-    @classmethod
-    def do_validation(cls, s: str, *args, **kwargs) -> Optional[Exception]:
-        if not s or not s.strip():
-            return
+            return datetime.datetime.fromisoformat(input_string).strftime('%H%M')
 
-        exc = super().do_validation(s, *args, **kwargs)
-        if exc:
-            return exc
-        datetime.time(int(s[:2]), int(s[2:]))
+        with suppress(ValueError):
+            return datetime.date.fromisoformat(input_string).strftime('%H%M')
+
+        return input_string
+
+    @classmethod
+    def do_validation(cls, input_string: str, *args, **kwargs) -> None:
+        if not input_string or not input_string.strip():
+            return
+        try:
+            super().do_validation(input_string, *args, **kwargs)
+        except Exception as exc:
+            raise exc
+
+        datetime.time(int(input_string[:2]), int(input_string[2:]))
 
 
 class FieldDefinition:
@@ -242,20 +269,26 @@ class FieldDefinition:
     Represents a definition of a piece of data within a record.
 
     Attributes:
-        field_name: str -- pretty name of a field within a record, like "record_code"
-        field_type: FieldType -- indicates the type of input that can be accepted
-            in a Field with this given FieldDefinition
-        length: int -- length of field (when original input is padded, aligned, corrected)
+        field_name: str -- pretty name of a field within a record,
+            like "record_code"
+        field_type: FieldType -- indicates the type of input that can be
+            accepted in a Field with this given FieldDefinition
+        length: int -- length of field
+            (when original input is padded, aligned, corrected)
         required: bool -- whether value needs to be non-blank
-        default: Optional[str] -- if no value is provided to Field, defines what is automatically set
-            as the Field's value
+        default: Optional[str] -- if no value is provided to Field,
+            defines what is automatically set as the Field's value
     """
+    # pylint: disable=too-many-arguments
     def __init__(
-            self, field_name: str, field_type: FieldType, length: int,
-            required: bool = True,
-            default: Optional[Union[str, int]] = None,
-            auto_correct_input: Optional[bool] = None,
-        ):
+        self,
+        field_name: str,
+        field_type: FieldType,
+        length: int,
+        required: bool = True,
+        default: Optional[Union[str, int]] = None,
+        auto_correct_input: Optional[bool] = None,
+    ):
         self.field_name = field_name
         self.field_type = field_type
         self.length = length
@@ -263,17 +296,25 @@ class FieldDefinition:
         self.default = str(default) if default is not None else None
         self.auto_correct_input = auto_correct_input
 
+    # pylint: disable=consider-using-f-string
     def __repr__(self) -> str:
-        return '<{}: {} [{}]>'.format(type(self).__name__, self.field_name, self.field_type.__name__)
-    
-    def correct_input(self, s: str) -> str:
-        return self.field_type.correct_input(s, self.auto_correct_input)
-    
-    def is_valid(self, s: str, raise_exc: bool = True, *args, **kwargs) -> bool:
-        return self.field_type.is_valid(s, raise_exc=raise_exc, *args, **kwargs)
+        return '<{}: {} [{}]>'.format(
+            type(self).__name__, self.field_name, self.field_type.__name__)
 
-    def get_fixed_width_value(self, s: str) -> str:
-        return self.field_type.apply_fixed_length(s, self.length)
+    def correct_input(self, input_string: str) -> str:
+        """Corrects input according to current setting and FieldType default setting."""
+        return self.field_type.correct_input(input_string, self.auto_correct_input)
+
+    def is_valid(self, input_string: str, *args, raise_exc: bool = True, **kwargs) -> bool:
+        """
+        Returns True if string is valid, else False.
+        If raise_exc, raises an exception instead of returning False.
+        """
+        return self.field_type.is_valid(input_string, *args, raise_exc=raise_exc, **kwargs)
+
+    def get_fixed_width_value(self, input_string: str) -> str:
+        """Convert input string to fixed length according to its FieldType."""
+        return self.field_type.apply_fixed_length(input_string, self.length)
 
 
 class Field:
@@ -282,18 +323,28 @@ class Field:
     Access cleaned value with .value property.
 
     Attributes:
-        field_definition: FieldDefinition -- defines properties of a field in a record
-        original_value: Optional[str] -- raw value passed into field before alignments and corrections
-        cleaned_value: str: Setting this attribute interrupts initialization if raw input value is invalid
+        field_definition: FieldDefinition -- defines properties of a field
+            in a record
+        original_value: Optional[str] -- raw value passed into field before
+            alignments and corrections
+        cleaned_value: str: Setting this attribute interrupts initialization
+            if raw input value is invalid
     """
+    # pylint: disable=too-few-public-methods
     def __init__(self, field_definition: FieldDefinition, value: Optional[str] = None):
         self.field_definition = field_definition
         self.original_value = value
-        self.cleaned_value = Field._create_cleaned_value(field_definition, value)
-    
+        self.value = value
+
     @property
     def value(self) -> str:
+        """Return cleaned value of field (not original value)."""
         return self.cleaned_value
+
+    @value.setter
+    def value(self, raw_value: str) -> None:
+        """Set a new cleaned value on this Field."""
+        self.cleaned_value = Field._create_cleaned_value(self.field_definition, raw_value)
 
     @staticmethod
     def _create_cleaned_value(field_definition: FieldDefinition, value: Optional[str] = None):
@@ -308,8 +359,9 @@ class Field:
 
         field_definition.is_valid(ret_value, raise_exc=True)
         return field_definition.get_fixed_width_value(ret_value)
-    
+
     @staticmethod
-    def _validate_required_value_not_empty(field_definition: FieldDefinition, value: Optional[str]) -> None:
+    def _validate_required_value_not_empty(
+        field_definition: FieldDefinition, value: Optional[str]) -> None:
         if value is None and field_definition.required and field_definition.default is None:
             raise EmptyRequiredFieldError(field_definition.field_name)
