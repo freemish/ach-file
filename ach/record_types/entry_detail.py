@@ -12,7 +12,9 @@ from .record_fields import (
 from .record_type_base import RecordType
 
 
+# pylint: disable=line-too-long
 class EntryDetailRecordType(RecordType):
+    """Define all fields in an entry detail record line of an ACH file."""
     field_definition_dict: Dict[str, FieldDefinition] = {
         'record_type_code': FieldDefinition('Record Type Code', IntegerFieldType, length=1, default=ENTRY_DETAIL_RECORD_TYPE_CODE),
         'transaction_code': FieldDefinition('Transaction Code', IntegerFieldType, length=2),
@@ -27,6 +29,7 @@ class EntryDetailRecordType(RecordType):
         'trace_sequence_number': FieldDefinition('Trace Number: Sequence Number', IntegerFieldType, length=7)
     }
 
+    # pylint: disable=too-many-arguments
     def __init__(
             self,
             transaction_code: int,
