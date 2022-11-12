@@ -4,6 +4,10 @@ import enum
 
 
 class BatchServiceClassCode(enum.IntEnum):
+    """
+    Represents whether a batch contains only credits,
+    only debits, or both.
+    """
     MIXED = 200
     CREDITS = 220
     DEBITS = 225
@@ -13,6 +17,12 @@ class BatchServiceClassCode(enum.IntEnum):
 
 
 class TransactionCode(enum.IntEnum):
+    """
+    Represents type of transaction:
+        - target is savings or checking account
+        - action is crediting the account or debiting the account
+        - whether is a dry-run (prenote) or is immediately effective
+    """
     CHECKING_CREDIT = 22
     CHECKING_CREDIT_PRENOTE = 23
     CHECKING_DEBIT = 27
@@ -24,24 +34,34 @@ class TransactionCode(enum.IntEnum):
 
     def __str__(self) -> str:
         return str(self.value)
-    
+
     def is_credit(self) -> bool:
+        """Return True if TransactionCode credits the account, else False"""
         return self.value % 10 in [2, 3]
-    
+
     def is_debit(self) -> bool:
+        """Return True if TransactionCode debits the account, else False"""
         return self.value % 10 in [7, 8]
 
     def is_prenote(self) -> bool:
+        """Return True if TransactionCode is only a dry-run transaction (prenote), else False"""
         return self.value % 10 in [3, 8]
 
     def is_checking(self) -> bool:
+        """Return True if transaction is against a checking account, else False"""
         return self.value // 10 == 2
 
     def is_savings(self) -> bool:
+        """Return True if transaction is against a savings account, else False"""
         return self.value // 10 == 3
 
 
 class BatchStandardEntryClassCode(enum.Enum):
+    """
+    Represents one of several common SEC codes.
+    See this site for more details:
+    https://achdevguide.nacha.org/ach-file-details
+    """
     PPD = enum.auto()
     ARC = enum.auto()
     BOC = enum.auto()
@@ -54,6 +74,7 @@ class BatchStandardEntryClassCode(enum.Enum):
     TEL = enum.auto()
     WEB = enum.auto()
 
+    # pylint: disable=invalid-overridden-method
     @property
     def value(self) -> str:
         return self.name
@@ -63,9 +84,15 @@ class BatchStandardEntryClassCode(enum.Enum):
 
 
 class AutoDateInput(enum.Enum):
+    """
+    If values "NOW" or "TOMORROW"
+    are put into a DateFieldType or TimeFieldType Field,
+    the Field will autogenerate a date given today's datetime.
+    """
     NOW = enum.auto()
     TOMORROW = enum.auto()
 
+    # pylint: disable=invalid-overridden-method
     @property
     def value(self) -> str:
         return self.name
