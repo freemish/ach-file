@@ -10,8 +10,9 @@ from .record_fields import (
 )
 from .record_type_base import RecordType
 
-
+# pylint: disable=line-too-long
 class FileControlRecordType(RecordType):
+    """Defines all fields of the file control record line in an ACH file."""
     field_definition_dict: Dict[str, FieldDefinition] = {
         'record_type_code': FieldDefinition('Record Type Code', IntegerFieldType, length=1, default=FILE_CONTROL_RECORD_TYPE_CODE),
         'batch_count': FieldDefinition('Batch Count', IntegerFieldType, length=6),
