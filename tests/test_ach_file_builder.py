@@ -276,7 +276,7 @@ class TestACHFileBuilder(TestCase):
                 ],
             },
             {
-                'transaction_code': 22,
+                'transaction_code': 39,
                 'rdfi_routing': '023456789',
                 'rdfi_account_number': '45656565',
                 'amount': '7000',
