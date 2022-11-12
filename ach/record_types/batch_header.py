@@ -18,7 +18,9 @@ from .record_fields import (
 from .record_type_base import RecordType
 
 
+# pylint: disable=line-too-long
 class BatchHeaderRecordType(RecordType):
+    """Define all fields in a batch header record line of an ACH file."""
     field_definition_dict: Dict[str, FieldDefinition] = {
         'record_type_code': FieldDefinition('Record Type Code', IntegerFieldType, length=1, default=BATCH_HEADER_RECORD_TYPE_CODE),
         'service_class_code': FieldDefinition('Service Class Code', IntegerFieldType, length=3, default=BATCH_DEFAULT_SERVICE_CLASS_CODE),
@@ -35,6 +37,7 @@ class BatchHeaderRecordType(RecordType):
         'batch_number': FieldDefinition('Batch Number', IntegerFieldType, length=7),
     }
 
+    # pylint: disable=too-many-arguments
     def __init__(self, company_name: str, company_identification: str, company_entry_description: str, odfi_identification: str, batch_number: int, **kwargs):
         kwargs['company_name'] = company_name
         kwargs['company_identification'] = company_identification
