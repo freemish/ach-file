@@ -8,7 +8,7 @@ from ach.constants import AutoDateInput, BatchStandardEntryClassCode, Transactio
 from tests import test_file
 
 
-class TestACHFileBuilderClassDisplayRequiredKeys(TestCase):
+class TestDisplayRequiredKeys(TestCase):
     def setUp(self) -> None:
         self.ach_file_builder_class = ACHFileBuilder
         return super().setUp()
@@ -78,7 +78,7 @@ class TestACHFileBuilder(TestCase):
         self.ach_file_builder_class = ACHFileBuilder
         return super().setUp()
 
-    def test_ach_file_builder_result_passes_parser(self):
+    def test_ach_file_builder(self):
         b = self.ach_file_builder_class(
             destination_routing='012345678',
             origin_routing='102345678',
@@ -118,15 +118,12 @@ class TestACHFileBuilder(TestCase):
                 ],
             },
         ])
-
-        print('"{}"'.format(b.render()))
-        
         parser = ACHFileContentsParser(b.render())
         ach_file_contents = parser.process_ach_file_contents(parser.process_records_list())
         self.assertEqual(b.render(), ach_file_contents.render_file_contents())
         self.assertDictEqual(b.ach_file_contents.render_json_dict(), ach_file_contents.render_json_dict())
 
-    def test_ach_file_builder_multiple_batches_result_passes_parser(self):
+    def test_ach_file_builder_multiple_batches(self):
         b = self.ach_file_builder_class(
             destination_routing='012345678',
             origin_routing='102345678',
