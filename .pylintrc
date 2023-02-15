@@ -1,2 +1,2 @@
 [MASTER]
-disable=consider-using-f-string,broad-except
+disable=consider-using-f-string,broad-except,duplicate-code
