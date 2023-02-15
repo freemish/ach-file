@@ -5,9 +5,12 @@ from typing import Any, Dict, List, Optional, Tuple
 
 from ..constants import FILE_HEADER_BLOCKING_FACTOR, RECORD_SIZE, TransactionCode
 from ..record_types import (
-    AddendaRecordType, BatchControlRecordType,
-    BatchHeaderRecordType, EntryDetailRecordType,
-    FileControlRecordType, FileHeaderRecordType
+    AddendaRecordType,
+    BatchControlRecordType,
+    BatchHeaderRecordType,
+    EntryDetailRecordType,
+    FileControlRecordType,
+    FileHeaderRecordType,
 )
 
 
@@ -20,10 +23,11 @@ class ACHFileContents:
         batches: List[ACHBatch]
         [computed property] file_control_record: FileControlRecordType
     """
+
     def __init__(
         self,
         file_header_record: FileHeaderRecordType,
-        batches: Optional[List['ACHBatch']] = None,
+        batches: Optional[List["ACHBatch"]] = None,
     ):
         self._file_header_record = file_header_record
         self.batches = batches or []
@@ -38,7 +42,7 @@ class ACHFileContents:
         record_types_list.append(self.file_control_record.render_record_line())
         return record_types_list
 
-    def render_file_contents(self, line_break: str = '\n', end: str = '\n') -> str:
+    def render_file_contents(self, line_break: str = "\n", end: str = "\n") -> str:
         """
         Render all records in ACHFileContents as a single flat-file string.
         """
@@ -48,7 +52,7 @@ class ACHFileContents:
         block_orphan_count = len(rendered_line_list) % FILE_HEADER_BLOCKING_FACTOR
         if block_orphan_count:
             for _ in range(FILE_HEADER_BLOCKING_FACTOR - block_orphan_count):
-                file_contents += line_break + ('9' * RECORD_SIZE)
+                file_contents += line_break + ("9" * RECORD_SIZE)
 
         return file_contents + end
 
@@ -57,11 +61,9 @@ class ACHFileContents:
         Render all records as dictionaries of their valid field values.
         """
         file_as_json_dict = {
-            'file_header': self.file_header_record.get_field_values(),
-            'batches': [
-                b.get_json_dict() for b in self.batches
-            ],
-            'file_control': self.file_control_record.get_field_values(),
+            "file_header": self.file_header_record.get_field_values(),
+            "batches": [b.get_json_dict() for b in self.batches],
+            "file_control": self.file_control_record.get_field_values(),
         }
         return file_as_json_dict
 
@@ -80,7 +82,7 @@ class ACHFileContents:
         if self._file_control_record:
             self._recalc_file_control = True
 
-    def add_batch(self, batch: 'ACHBatch') -> None:
+    def add_batch(self, batch: "ACHBatch") -> None:
         """
         Add an ACHBatch to ACHFileContents.
         If file control has already been calculated, recalculate.
@@ -89,7 +91,7 @@ class ACHFileContents:
         if self._file_control_record:
             self._recalc_file_control = True
 
-    def remove_batch_by_index(self, index: int) -> 'ACHBatch':
+    def remove_batch_by_index(self, index: int) -> "ACHBatch":
         """
         Remove an ACHBatch from ACHFileContents.
         If file control has already been calculated, recalculate.
@@ -99,7 +101,7 @@ class ACHFileContents:
             self._recalc_file_control = True
         return batch
 
-    def get_all_transactions(self) -> List['ACHTransactionEntry']:
+    def get_all_transactions(self) -> List["ACHTransactionEntry"]:
         """
         Get all ACHTransactionEntry objects across all batches.
         """
@@ -141,13 +143,13 @@ class ACHFileContents:
 
     def _compute_entry_and_addenda_count(self) -> int:
         return sum(
-            int(x.batch_control_record.get_field_value('entry_and_addenda_count'))
+            int(x.batch_control_record.get_field_value("entry_and_addenda_count"))
             for x in self.batches
         )
 
     def _compute_entry_hash(self) -> int:
         return sum(
-            int(x.batch_control_record.get_field_value('entry_hash'))
+            int(x.batch_control_record.get_field_value("entry_hash"))
             for x in self.batches
         )
 
@@ -168,11 +170,11 @@ class ACHFileContents:
     def _compute_debit_and_credit_totals(self) -> Tuple[int, int]:
         debit_sum, credit_sum = 0, 0
         debit_sum = sum(
-            int(x.batch_control_record.get_field_value('total_debit_amount'))
+            int(x.batch_control_record.get_field_value("total_debit_amount"))
             for x in self.batches
         )
         credit_sum = sum(
-            int(x.batch_control_record.get_field_value('total_credit_amount'))
+            int(x.batch_control_record.get_field_value("total_credit_amount"))
             for x in self.batches
         )
         return debit_sum, credit_sum
@@ -187,10 +189,11 @@ class ACHBatch:
         transactions: List[ACHTransactionEntry]
         [computed + cached property] batch_control_record: BatchControlRecordType
     """
+
     def __init__(
         self,
         batch_header_record: BatchHeaderRecordType,
-        transactions: Optional[List['ACHTransactionEntry']] = None,
+        transactions: Optional[List["ACHTransactionEntry"]] = None,
     ):
         self._batch_header_record = batch_header_record
         self.transactions = transactions or []
@@ -212,7 +215,7 @@ class ACHBatch:
         if self._batch_control_record:
             self._recalc_batch_control = True
 
-    def add_transaction(self, transaction: 'ACHTransactionEntry') -> None:
+    def add_transaction(self, transaction: "ACHTransactionEntry") -> None:
         """
         Adds an ACHTransactionEntry to this ACHBatch.
         If batch control has been computed, set to recalculate.
@@ -221,7 +224,7 @@ class ACHBatch:
         if self._batch_control_record:
             self._recalc_batch_control = True
 
-    def remove_transaction_by_index(self, index: int) -> 'ACHTransactionEntry':
+    def remove_transaction_by_index(self, index: int) -> "ACHTransactionEntry":
         """
         Removes an ACHTransactionEntry by index.
         If batch control has been computed, set to recalculate.
@@ -240,7 +243,9 @@ class ACHBatch:
         return self._batch_control_record
 
     @batch_control_record.setter
-    def batch_control_record(self, batch_control_record: BatchControlRecordType) -> None:
+    def batch_control_record(
+        self, batch_control_record: BatchControlRecordType
+    ) -> None:
         """For use by file parser."""
         self._batch_control_record = batch_control_record
 
@@ -261,11 +266,9 @@ class ACHBatch:
         mapped from field names to their valid values.
         """
         batch_dict = {
-            'batch_header': self._batch_header_record.get_field_values(),
-            'transactions': [
-                t.get_json_dict() for t in self.transactions
-            ],
-            'batch_control': self.batch_control_record.get_field_values(),
+            "batch_header": self._batch_header_record.get_field_values(),
+            "transactions": [t.get_json_dict() for t in self.transactions],
+            "batch_control": self.batch_control_record.get_field_values(),
         }
         return batch_dict
 
@@ -277,13 +280,15 @@ class ACHBatch:
             total_debit_amount=debit_total,
             total_credit_amount=credit_total,
             service_class_code=self._batch_header_record.get_field_value(
-                'service_class_code'),
+                "service_class_code"
+            ),
             company_identification=self._batch_header_record.get_field_value(
-                'company_identification'),
+                "company_identification"
+            ),
             odfi_identification=self._batch_header_record.get_field_value(
-                'odfi_identification'),
-            batch_number=self._batch_header_record.get_field_value(
-                'batch_number'),
+                "odfi_identification"
+            ),
+            batch_number=self._batch_header_record.get_field_value("batch_number"),
         )
 
     def _compute_entry_hash(self) -> int:
@@ -306,6 +311,7 @@ class ACHTransactionEntry:
         entry: EntryDetailRecordType
         addendas: List[AddendaRecordType]
     """
+
     def __init__(
         self,
         entry: EntryDetailRecordType,
@@ -337,7 +343,7 @@ class ACHTransactionEntry:
         """
         Return first 8 digits of RDFI routing number converted to int.
         """
-        return int(self._entry.get_field_value('rdfi_routing')[:8])
+        return int(self._entry.get_field_value("rdfi_routing")[:8])
 
     def get_transaction_code_enum(self) -> TransactionCode:
         """Return TransactionCode enum from transaction_code field."""
@@ -349,29 +355,20 @@ class ACHTransactionEntry:
 
     def get_debit_amount(self) -> int:
         """Get amount if amount is a debit else 0."""
-        return (
-            self.get_amount()
-            if self.get_transaction_code_enum().is_debit()
-            else 0
-        )
+        return self.get_amount() if self.get_transaction_code_enum().is_debit() else 0
 
     def get_credit_amount(self) -> int:
         """Get amount if amount is a credit else 0."""
-        return (
-            self.get_amount()
-            if self.get_transaction_code_enum().is_credit()
-            else 0
-        )
+        return self.get_amount() if self.get_transaction_code_enum().is_credit() else 0
 
     def get_rendered_line_list(self) -> List[str]:
         """
         Get list of all contained RecordTypes rendered
         as single-line strings.
         """
-        return (
-            [self._entry.render_record_line()]
-            + [x.render_record_line() for x in self.addendas]
-        )
+        return [self._entry.render_record_line()] + [
+            x.render_record_line() for x in self.addendas
+        ]
 
     def get_json_dict(self) -> Dict[str, Any]:
         """
@@ -379,9 +376,7 @@ class ACHTransactionEntry:
         field names mapped to valid field values.
         """
         tx_dict = {
-            'entry_detail': self._entry.get_field_values(),
-            'addendas': [
-                a.get_field_values() for a in self.addendas
-            ],
+            "entry_detail": self._entry.get_field_values(),
+            "addendas": [a.get_field_values() for a in self.addendas],
         }
         return tx_dict

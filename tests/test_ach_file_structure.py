@@ -3,7 +3,12 @@
 from unittest import TestCase
 
 from ach.files import ACHBatch, ACHFileContents, ACHTransactionEntry
-from ach.record_types import AddendaRecordType, BatchHeaderRecordType, EntryDetailRecordType, FileHeaderRecordType
+from ach.record_types import (
+    AddendaRecordType,
+    BatchHeaderRecordType,
+    EntryDetailRecordType,
+    FileHeaderRecordType,
+)
 from ach.constants import RECORD_SIZE
 from tests import test_file
 
@@ -15,7 +20,7 @@ class TestACHFileContents(TestCase):
             rdfi_routing=123456780,
             rdfi_account_number=234234234,
             amount=15000,
-            individual_name='BILLY HOLIDAY',
+            individual_name="BILLY HOLIDAY",
             addenda_record_indicator=0,
             trace_number=123456780000002,
         )
@@ -23,20 +28,20 @@ class TestACHFileContents(TestCase):
             FileHeaderRecordType(
                 destination_routing=123456780,
                 origin_routing=123456780,
-                destination_name='YOUR BANK',
-                origin_name='YOUR COMPANY',
-                file_creation_date='140902',
-                file_creation_time='0123',
+                destination_name="YOUR BANK",
+                origin_name="YOUR COMPANY",
+                file_creation_date="140902",
+                file_creation_time="0123",
             ),
             batches=[
                 ACHBatch(
                     BatchHeaderRecordType(
-                        company_name='YOUR COMPANY',
+                        company_name="YOUR COMPANY",
                         company_identification=1234567890,
-                        company_entry_description='PAYROLL',
+                        company_entry_description="PAYROLL",
                         odfi_identification=112345678,
                         batch_number=1,
-                        effective_entry_date='140903',
+                        effective_entry_date="140903",
                     ),
                     transactions=[
                         ACHTransactionEntry(
@@ -45,8 +50,8 @@ class TestACHFileContents(TestCase):
                                 rdfi_routing=123456780,
                                 rdfi_account_number=11232132,
                                 amount=1000,
-                                individual_name='ALICE WANDERDUST',
-                                trace_number='123456780000001',
+                                individual_name="ALICE WANDERDUST",
+                                trace_number="123456780000001",
                             ),
                             addendas=[
                                 AddendaRecordType(
@@ -65,12 +70,12 @@ class TestACHFileContents(TestCase):
                                 rdfi_routing=123232318,
                                 rdfi_account_number=123123123,
                                 amount=1213,
-                                individual_name='RACHEL WELCH',
+                                individual_name="RACHEL WELCH",
                                 trace_odfi_identifier=12345678,
                                 trace_sequence_number=3,
                                 addenda_record_indicator=0,
                             )
-                        )
+                        ),
                     ],
                 ),
             ],

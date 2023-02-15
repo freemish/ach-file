@@ -4,9 +4,12 @@ from typing import Dict, List, Optional, Union
 
 from .file_structure import ACHBatch, ACHFileContents, ACHTransactionEntry
 from ..record_types import (
-    AddendaRecordType, BatchControlRecordType,
-    BatchHeaderRecordType, EntryDetailRecordType,
-    FileControlRecordType, FileHeaderRecordType
+    AddendaRecordType,
+    BatchControlRecordType,
+    BatchHeaderRecordType,
+    EntryDetailRecordType,
+    FileControlRecordType,
+    FileHeaderRecordType,
 )
 from ..record_types.record_type_base import RecordType
 from ..constants import (
@@ -16,7 +19,7 @@ from ..constants import (
     ENTRY_DETAIL_RECORD_TYPE_CODE,
     FILE_CONTROL_RECORD_TYPE_CODE,
     FILE_HEADER_RECORD_TYPE_CODE,
-    RECORD_SIZE
+    RECORD_SIZE,
 )
 
 
@@ -26,6 +29,7 @@ class ACHFileContentsParser:
     Can return a list of RecordType types
     and an ACHFileContents type.
     """
+
     def __init__(self, ach_file_str: str):
         self._raw_str = ach_file_str
 
@@ -39,7 +43,8 @@ class ACHFileContentsParser:
     ) -> ACHFileContents:
         """Processes a list of RecordTypes into an ACHFileContents."""
         return self.convert_records_list_to_ach_file_contents(
-            records_list or self.process_records_list())
+            records_list or self.process_records_list()
+        )
 
     @staticmethod
     def convert_records_list_to_ach_file_contents(
@@ -66,21 +71,23 @@ class ACHFileContentsParser:
         ach_batch_list: List[ACHBatch] = []
         batch_to_records: Dict[
             BatchControlRecordType,
-            List[Union[EntryDetailRecordType, AddendaRecordType]]
+            List[Union[EntryDetailRecordType, AddendaRecordType]],
         ] = {}
         curr_batch_header: Optional[BatchHeaderRecordType] = None
         for record in records_list:
-            if (record.get_field_value('record_type_code')
-                == str(BATCH_HEADER_RECORD_TYPE_CODE)
+            if record.get_field_value("record_type_code") == str(
+                BATCH_HEADER_RECORD_TYPE_CODE
             ):
                 curr_batch_header = record
                 batch_to_records[curr_batch_header] = []
                 continue
-            if (record.get_field_value('record_type_code')
-                == str(BATCH_CONTROL_RECORD_TYPE_CODE)
+            if record.get_field_value("record_type_code") == str(
+                BATCH_CONTROL_RECORD_TYPE_CODE
             ):
                 # pylint: disable=line-too-long
-                tx_entries = ACHFileContentsParser._convert_batch_transaction_record_types_to_ach_transaction_entry_list(batch_to_records[curr_batch_header])
+                tx_entries = ACHFileContentsParser._convert_batch_transaction_record_types_to_ach_transaction_entry_list(
+                    batch_to_records[curr_batch_header]
+                )
                 ach_batch = ACHBatch(curr_batch_header, tx_entries)
                 if not recalc_batch_control:
                     ach_batch.batch_control_record = record
@@ -97,7 +104,9 @@ class ACHFileContentsParser:
         curr_entry: Optional[EntryDetailRecordType] = None
         curr_entry_addendas: List[AddendaRecordType] = []
         for record in records_list:
-            if record.get_field_value('record_type_code') == str(ADDENDA_RECORD_TYPE_CODE):
+            if record.get_field_value("record_type_code") == str(
+                ADDENDA_RECORD_TYPE_CODE
+            ):
                 curr_entry_addendas.append(record)
                 continue
             if curr_entry:
@@ -108,7 +117,9 @@ class ACHFileContentsParser:
         entries.append(ACHTransactionEntry(curr_entry, curr_entry_addendas))
         return entries
 
-    def get_record_fields_dict_list(self, records_list: List[RecordType]) -> List[Dict[str, str]]:
+    def get_record_fields_dict_list(
+        self, records_list: List[RecordType]
+    ) -> List[Dict[str, str]]:
         """
         Returns records list as list of dictionaries (field names: clean values).
         """
@@ -136,7 +147,9 @@ class ACHFileContentsParser:
         return record_type_map.get(int(record_type_code))
 
     @staticmethod
-    def convert_line_to_record_type(line_str: str, record_type_class: RecordType) -> RecordType:
+    def convert_line_to_record_type(
+        line_str: str, record_type_class: RecordType
+    ) -> RecordType:
         """
         Converts a line in an ACH record to a RecordType according to its
         leading record type code.
@@ -144,14 +157,14 @@ class ACHFileContentsParser:
         str_index = 0
         kwargs = {}
         for key, field_def in record_type_class.field_definition_dict.items():
-            kwargs[key] = line_str[str_index: str_index + field_def.length]
+            kwargs[key] = line_str[str_index : str_index + field_def.length]
             str_index += field_def.length
         return record_type_class(**kwargs)
 
     @staticmethod
     def convert_file_string_to_records_list(
         file_str: str,
-        line_break: str = '\n',
+        line_break: str = "\n",
     ) -> List[RecordType]:
         """
         Splits a file string along line breaks
@@ -161,9 +174,13 @@ class ACHFileContentsParser:
         lines = file_str.split(line_break)
         records = []
         for line in lines:
-            if not line or line == '9' * RECORD_SIZE:
+            if not line or line == "9" * RECORD_SIZE:
                 continue
-            record_type_class = ACHFileContentsParser.get_record_type_from_record_type_code(line[0])
-            record_type = ACHFileContentsParser.convert_line_to_record_type(line, record_type_class)
+            record_type_class = (
+                ACHFileContentsParser.get_record_type_from_record_type_code(line[0])
+            )
+            record_type = ACHFileContentsParser.convert_line_to_record_type(
+                line, record_type_class
+            )
             records.append(record_type)
         return records

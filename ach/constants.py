@@ -8,6 +8,7 @@ class BatchServiceClassCode(enum.IntEnum):
     Represents whether a batch contains only credits,
     only debits, or both.
     """
+
     MIXED = 200
     CREDITS = 220
     DEBITS = 225
@@ -23,6 +24,7 @@ class TransactionCode(enum.IntEnum):
         - action is crediting the account or debiting the account
         - whether is a dry-run (prenote) or is immediately effective
     """
+
     CHECKING_CREDIT = 22
     CHECKING_CREDIT_PRENOTE = 23
     CHECKING_DEBIT = 27
@@ -42,7 +44,7 @@ class TransactionCode(enum.IntEnum):
         pseudo_member = cls._value2member_map_.get(value, None)
         if pseudo_member is None:
             new_member = int.__new__(cls, value)
-            new_member._name_ = f'UNKNOWN_{value}'
+            new_member._name_ = f"UNKNOWN_{value}"
             new_member._value_ = value
             pseudo_member = cls._value2member_map_.setdefault(value, new_member)
         return pseudo_member
@@ -77,6 +79,7 @@ class BatchStandardEntryClassCode(enum.Enum):
     See this site for more details:
     https://achdevguide.nacha.org/ach-file-details
     """
+
     PPD = enum.auto()
     ARC = enum.auto()
     BOC = enum.auto()
@@ -104,6 +107,7 @@ class AutoDateInput(enum.Enum):
     are put into a DateFieldType or TimeFieldType Field,
     the Field will autogenerate a date given today's datetime.
     """
+
     NOW = enum.auto()
     TOMORROW = enum.auto()
 
@@ -120,7 +124,7 @@ RECORD_SIZE = 94
 
 FILE_HEADER_RECORD_TYPE_CODE = 1
 FILE_HEADER_PRIORITY_CODE = 1
-FILE_HEADER_DEFAULT_FILE_ID_MODIFIER = 'A'
+FILE_HEADER_DEFAULT_FILE_ID_MODIFIER = "A"
 FILE_HEADER_BLOCKING_FACTOR = 10
 FILE_HEADER_FORMAT_CODE = 1
 

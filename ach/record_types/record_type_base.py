@@ -13,6 +13,7 @@ class InvalidRecordSizeError(Exception):
     Raises when a RecordType's FieldDefinitions result in
     an invalid record size.
     """
+
     msg_format = (
         "FieldDefinition list for {} would result in an invalid record size"
         " of {} (valid record size is {})"
@@ -22,13 +23,14 @@ class InvalidRecordSizeError(Exception):
         self,
         record_type_class_name: str,
         invalid_record_size: int,
-        valid_record_size: int = RECORD_SIZE
+        valid_record_size: int = RECORD_SIZE,
     ):
         self.record_type_class_name = record_type_class_name
         self.invalid_record_size = invalid_record_size
         self.valid_record_size = valid_record_size
         self.message = self.msg_format.format(
-            record_type_class_name, invalid_record_size, valid_record_size)
+            record_type_class_name, invalid_record_size, valid_record_size
+        )
         super().__init__(self.message)
 
 
@@ -36,13 +38,15 @@ class InvalidRecordTypeParametersError(Exception):
     """
     Raises when a RecordType accepts an invalid parameter by keyword.
     """
+
     msg_format = "RecordType class {} received invalid kwargs on instantiation: {}"
 
     def __init__(self, record_type_class_name: str, invalid_kwargs: List[str]) -> None:
         self.record_type_class_name = record_type_class_name
         self.invalid_kwargs = invalid_kwargs
         self.message = self.msg_format.format(
-            self.record_type_class_name, invalid_kwargs)
+            self.record_type_class_name, invalid_kwargs
+        )
         super().__init__(self.message)
 
 
@@ -56,14 +60,20 @@ class RecordTypeAggregateFieldCreationError(Exception):
         failed_keys: List[str] -- List of keys that failed to be set
         class_name: str -- Name of class where errors were encountered
     """
-    msg_format = "Encountered {} errors generating Fields for class {}; failed keys: {}; {}"
 
-    def __init__(self, class_name: str, errors: List[Exception], failed_keys: List[str]):
+    msg_format = (
+        "Encountered {} errors generating Fields for class {}; failed keys: {}; {}"
+    )
+
+    def __init__(
+        self, class_name: str, errors: List[Exception], failed_keys: List[str]
+    ):
         self.class_name = class_name
         self.errors = errors
         self.failed_keys = failed_keys
         self.message = self.msg_format.format(
-            len(errors), self.class_name, failed_keys, errors)
+            len(errors), self.class_name, failed_keys, errors
+        )
         super().__init__(self.message)
 
 
@@ -72,6 +82,7 @@ class RecordType:
     Base class for record types.
     Renders Fields as a record line by validating FieldDefinitions and generating Fields from them.
     """
+
     field_definition_dict: Dict[str, FieldDefinition] = {}
 
     def __init__(
@@ -84,16 +95,17 @@ class RecordType:
             self.field_definition_dict = field_definition_dict
 
         self._validate_field_definition_list(
-            self.field_definition_dict, desired_record_size)
-        self._validate_no_unknown_key_arguments(
-            self.field_definition_dict, kwargs)
+            self.field_definition_dict, desired_record_size
+        )
+        self._validate_no_unknown_key_arguments(self.field_definition_dict, kwargs)
 
         self.fields: Dict[str, Field] = self._generate_fields_dict(
-            self.field_definition_dict, kwargs)
+            self.field_definition_dict, kwargs
+        )
 
     def render_record_line(self) -> str:
         """Render single record as a line in a valid ACH file."""
-        result = ''
+        result = ""
         for field in self.fields.values():
             result += field.value
         return result
@@ -152,18 +164,27 @@ class RecordType:
             self._catch_set_value_on_field_errors(failed_keys, exceptions, key, value)
         if failed_keys:
             raise RecordTypeAggregateFieldCreationError(
-                type(self).__name__, exceptions, failed_keys) from exceptions[0]
+                type(self).__name__, exceptions, failed_keys
+            ) from exceptions[0]
 
-    def _generate_fields_dict(self, field_def_dict: Dict, kwargs: Dict) -> Dict[str, Field]:
+    def _generate_fields_dict(
+        self, field_def_dict: Dict, kwargs: Dict
+    ) -> Dict[str, Field]:
         fields = {}
         failed_keys, exceptions = [], []
         for key in field_def_dict:
             self._catch_set_value_on_field_errors(
-                failed_keys, exceptions, key, kwargs.get(key),
-                field_def_dict=field_def_dict, fields_dict=fields)
+                failed_keys,
+                exceptions,
+                key,
+                kwargs.get(key),
+                field_def_dict=field_def_dict,
+                fields_dict=fields,
+            )
         if exceptions:
             raise RecordTypeAggregateFieldCreationError(
-                type(self).__name__, exceptions, failed_keys) from exceptions[0]
+                type(self).__name__, exceptions, failed_keys
+            ) from exceptions[0]
         return fields
 
     def _catch_set_value_on_field_errors(
@@ -192,10 +213,11 @@ class RecordType:
         field_definition_dict: Dict[str, FieldDefinition],
         desired_record_size: int = RECORD_SIZE,
     ) -> None:
-
         resulting_record_size = 0
         for field_def in field_definition_dict.values():
             resulting_record_size += field_def.length
 
         if resulting_record_size != desired_record_size:
-            raise InvalidRecordSizeError(cls.__name__, resulting_record_size, desired_record_size)
+            raise InvalidRecordSizeError(
+                cls.__name__, resulting_record_size, desired_record_size
+            )

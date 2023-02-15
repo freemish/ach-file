@@ -13,7 +13,7 @@ class TestParser(TestCase):
         parser = ACHFileContentsParser(test_file)
         records_list = parser.process_records_list()
         ach_file_contents = parser.process_ach_file_contents(records_list)
-        
+
         for i, record in enumerate(records_list):
             self.assertEqual(record.render_record_line(), test_file_lines[i])
 
