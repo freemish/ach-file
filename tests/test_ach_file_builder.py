@@ -5,19 +5,8 @@ from unittest import TestCase
 from ach.files import ACHFileBuilder, ACHFileContentsParser, NoBatchForTransactionError
 from ach.record_types import AddendaRecordType, BatchHeaderRecordType, EntryDetailRecordType
 from ach.constants import AutoDateInput, BatchStandardEntryClassCode, TransactionCode
+from tests import test_file
 
-
-test_file = """101 123456780 1234567801409020123A094101YOUR BANK              YOUR COMPANY                   
-5200YOUR COMPANY                        1234567890PPDPAYROLL         140903   1123456780000001
-62212345678011232132         0000001000               ALICE WANDERDUST        1123456780000001
-705HERE IS SOME ADDITIONAL INFORMATION                                             00010000001
-627123456780234234234        0000015000               BILLY HOLIDAY           0123456780000002
-622123232318123123123        0000001213               RACHEL WELCH            0123456780000003
-820000000400370145870000000150000000000022131234567890                         123456780000001
-9000001000001000000040037014587000000015000000000002213                                       
-9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
-9999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999
-"""
 
 class TestACHFileBuilderClassDisplayRequiredKeys(TestCase):
     def setUp(self) -> None:
