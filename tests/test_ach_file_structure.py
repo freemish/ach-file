@@ -107,3 +107,45 @@ class TestACHFileContents(TestCase):
         self.assertEqual(
             int(ach_file_contents.file_control_record.get_field_value("block_count")), 4
         )
+
+    def test_compute_line_count(self):
+        ach_file_contents = ACHFileContentsParser(test_file).process_ach_file_contents()
+        self.assertEqual(ach_file_contents._compute_line_count(), 8)
+
+    def test_add_batch_recalculates_control_records(self):
+        ach_file_contents = ACHFileContentsParser(test_file).process_ach_file_contents()
+        ach_file_contents.add_batch(
+            ACHBatch(
+                BatchHeaderRecordType(
+                    company_name="Test Company",
+                    company_identification="0912",
+                    company_entry_description="Various",
+                    odfi_identification="12345678",
+                    batch_number=2,
+                ),
+                transactions=[
+                    ACHTransactionEntry(
+                        EntryDetailRecordType(
+                            transaction_code=27,
+                            rdfi_routing="012345678",
+                            rdfi_account_number="0123456",
+                            amount=100,
+                            individual_name="Hello Darling",
+                            trace_odfi_identifier=12345678,
+                            trace_sequence_number=4,
+                            addenda_record_indicator=1,
+                        ),
+                        addendas=[
+                            AddendaRecordType(
+                                "Payment-related information",
+                                entry_detail_sequence_number=4,
+                                addenda_sequence_number=1,
+                            )
+                        ],
+                    )
+                ],
+            )
+        )
+        self.assertEqual(
+            int(ach_file_contents.file_control_record.get_field_value("batch_count")), 2
+        )
