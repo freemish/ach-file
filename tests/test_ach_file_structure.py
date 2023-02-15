@@ -2,14 +2,19 @@
 
 from unittest import TestCase
 
-from ach.files import ACHBatch, ACHFileContents, ACHTransactionEntry
+from ach.constants import RECORD_SIZE
+from ach.files import (
+    ACHBatch,
+    ACHFileContents,
+    ACHTransactionEntry,
+    ACHFileContentsParser,
+)
 from ach.record_types import (
     AddendaRecordType,
     BatchHeaderRecordType,
     EntryDetailRecordType,
     FileHeaderRecordType,
 )
-from ach.constants import RECORD_SIZE
 from tests import test_file
 
 
@@ -86,3 +91,19 @@ class TestACHFileContents(TestCase):
         for i, line in enumerate(file_lines):
             self.assertEqual(len(line), RECORD_SIZE)
             self.assertEqual(line, test_file_lines[i])
+
+    def test_set_file_header_recalculates_file_control(self):
+        ach_file_contents = ACHFileContentsParser(test_file).process_ach_file_contents()
+        new_file_header = FileHeaderRecordType(
+            destination_routing=123456780,
+            origin_routing=123456780,
+            destination_name="YOUR BANK",
+            origin_name="YOUR COMPANY",
+            file_creation_date="140902",
+            file_creation_time="0123",
+            blocking_factor=2,
+        )
+        ach_file_contents.file_header_record = new_file_header
+        self.assertEqual(
+            int(ach_file_contents.file_control_record.get_field_value("block_count")), 4
+        )

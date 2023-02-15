@@ -78,7 +78,7 @@ class ACHFileContents:
         If file header record is changed when file control has already
         been calculated, recalculate file control.
         """
-        self.file_header_record = file_header_record
+        self._file_header_record = file_header_record
         if self._file_control_record:
             self._recalc_file_control = True
 
@@ -165,7 +165,10 @@ class ACHFileContents:
     ) -> int:
         if line_count is None:
             line_count = self._compute_line_count(entry_addenda_count)
-        return ceil(line_count / float(FILE_HEADER_BLOCKING_FACTOR))
+        return ceil(
+            line_count
+            / float(self.file_header_record.get_field_value("blocking_factor"))
+        )
 
     def _compute_debit_and_credit_totals(self) -> Tuple[int, int]:
         debit_sum, credit_sum = 0, 0
