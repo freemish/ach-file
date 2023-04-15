@@ -36,11 +36,11 @@ class TransactionCode(enum.IntEnum):
 
     @classmethod
     def _missing_(cls, value):
-        return cls._create_pseudo_member_(value)
+        return cls._create_pseudo_member(value)
 
     # pylint: disable=attribute-defined-outside-init
     @classmethod
-    def _create_pseudo_member_(cls, value):
+    def _create_pseudo_member(cls, value):
         pseudo_member = cls._value2member_map_.get(value, None)
         if pseudo_member is None:
             new_member = int.__new__(cls, value)
