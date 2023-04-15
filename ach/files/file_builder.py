@@ -22,7 +22,7 @@ class NoBatchForTransactionError(Exception):
 class ACHFileBuilder:
     """Builds an ACHFileContents object."""
 
-    def __init__(self, **file_settings):
+    def __init__(self, odfi_identification: str, **file_settings: Any) -> None:
         """
         Accepts a dict of file settings.
         Run cls.get_file_setting_fields to see all key options.
@@ -31,26 +31,25 @@ class ACHFileBuilder:
 
             settings_dict = {
                 'destination_routing': '012345678',
-                'origin_routing': '102345678',
                 'destination_name': 'YOUR BANK',
+                'company_identification': 'Company Identification Number',
                 'origin_name': 'YOUR FINANCIAL INSTITUTION',
                 'file_id_modifier': 'B',
             }
-            ACHFileBuilder(**settings_dict)
+            ACHFileBuilder(odfi_identification, **settings_dict)
 
             ACHFileBuilder(
+                odfi_identification='10234567',
                 destination_routing='012345678',
-                origin_routing='102345678',
                 destination_name='YOUR BANK',
-                origin_name='YOUR FINANCIAL INSTITUTION',
+                origin_name='YOUR FINANCIAL INSTITUTION'
+                company_identification='Company Identification Number',
             )
         """
         self.ach_file_contents: ACHFileContents = ACHFileContents(
             FileHeaderRecordType(**file_settings)
         )
-        self.default_odfi_identification: str = file_settings.get(
-            "origin_routing", ""
-        ).lstrip()[:8]
+        self.default_odfi_identification = odfi_identification
 
     def render(self, line_break: str = "\n", end: str = "\n") -> str:
         """Renders ACH flat file contents as a string."""

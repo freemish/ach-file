@@ -45,11 +45,8 @@ class FileHeaderRecordType(RecordType):
             length=10,
             auto_correct_input=True,
         ),
-        "origin_routing": FieldDefinition(
-            "Immediate Origin Routing",
-            BlankPaddedRoutingNumberFieldType,
-            length=10,
-            auto_correct_input=True,
+        "company_identification": FieldDefinition(
+            "Company Identification Number", IntegerFieldType, length=10
         ),
         "file_creation_date": FieldDefinition(
             "File Creation Date",
@@ -93,14 +90,14 @@ class FileHeaderRecordType(RecordType):
     def __init__(
         self,
         destination_routing: str,
-        origin_routing: str,
+        company_identification: str,
         destination_name: str,
         origin_name: str,
         **kwargs
     ):
         self.field_definition_dict = self.field_definition_dict
         kwargs["destination_routing"] = destination_routing
-        kwargs["origin_routing"] = origin_routing
+        kwargs["company_identification"] = company_identification
         kwargs["destination_name"] = destination_name
         kwargs["origin_name"] = origin_name
         super().__init__(**kwargs)
