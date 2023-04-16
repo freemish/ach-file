@@ -24,7 +24,7 @@ class TestDisplayRequiredKeys(TestCase):
     def test_ach_file_builder_required_file_header_keys(self):
         test_required_keys = [
             "destination_routing",
-            "origin_routing",
+            "origin_id",
             "destination_name",
             "origin_name",
         ]
@@ -40,7 +40,7 @@ class TestDisplayRequiredKeys(TestCase):
             "record_type_code",
             "priority_code",
             "destination_routing",
-            "origin_routing",
+            "origin_id",
             "file_creation_date",
             "file_creation_time",
             "file_id_modifier",
@@ -176,7 +176,7 @@ class TestACHFileBuilder(TestCase):
     def test_ach_file_builder(self):
         b = self.ach_file_builder_class(
             destination_routing="012345678",
-            origin_routing="102345678",
+            origin_id="102345678",
             destination_name="YOUR BANK",
             origin_name="YOUR FINANCIAL INSTITUTION",
         )
@@ -232,7 +232,7 @@ class TestACHFileBuilder(TestCase):
     def test_ach_file_builder_multiple_batches(self):
         b = self.ach_file_builder_class(
             destination_routing="012345678",
-            origin_routing="102345678",
+            origin_id="102345678",
             destination_name="YOUR BANK",
             origin_name="YOUR FINANCIAL INSTITUTION",
         )
@@ -362,7 +362,7 @@ class TestACHFileBuilder(TestCase):
     def test_add_transaction_before_batch(self):
         b = self.ach_file_builder_class(
             destination_routing="012345678",
-            origin_routing="102345678",
+            origin_id="102345678",
             destination_name="YOUR BANK",
             origin_name="YOUR FINANCIAL INSTITUTION",
         )
@@ -419,7 +419,7 @@ class TestACHFileBuilder(TestCase):
     def test_add_transaction_before_batch_raise_exc_false(self):
         b = self.ach_file_builder_class(
             destination_routing="012345678",
-            origin_routing="102345678",
+            origin_id="102345678",
             destination_name="YOUR BANK",
             origin_name="YOUR FINANCIAL INSTITUTION",
         )
@@ -477,7 +477,7 @@ class TestACHFileBuilder(TestCase):
     def test_ach_file_builder_result_passes_parser_skips_entries(self):
         b = self.ach_file_builder_class(
             destination_routing="012345678",
-            origin_routing="102345678",
+            origin_id="102345678",
             destination_name="YOUR BANK",
             origin_name="YOUR FINANCIAL INSTITUTION",
         )
@@ -536,7 +536,7 @@ class TestACHFileBuilder(TestCase):
     def test_add_transaction_to_nonexistent_batch(self):
         b = self.ach_file_builder_class(
             destination_routing="012345678",
-            origin_routing="102345678",
+            origin_id="102345678",
             destination_name="YOUR BANK",
             origin_name="YOUR FINANCIAL INSTITUTION",
         )
@@ -603,11 +603,11 @@ class TestACHFileBuilder(TestCase):
     def test_ach_file_builder_for_custom_field_definition(self):
         """Tests to ensure use case for 10-digit file header odfi identification field is met."""
         self.ach_file_builder_class.file_header_record_type_class.field_definition_dict[
-            "origin_routing"
+            "origin_id"
         ].field_type = AlphaNumFieldType
         b = self.ach_file_builder_class(
             destination_routing="012345678",
-            origin_routing="1234567890",
+            origin_id="1234567890",
             destination_name="YOUR BANK",
             origin_name="YOUR COMPANY",
         )
@@ -660,5 +660,5 @@ class TestACHFileBuilder(TestCase):
             b.ach_file_contents.render_json_dict(), ach_file_contents.render_json_dict()
         )
         self.ach_file_builder_class.file_header_record_type_class.field_definition_dict[
-            "origin_routing"
+            "origin_id"
         ].field_type = BlankPaddedRoutingNumberFieldType

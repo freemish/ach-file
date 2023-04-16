@@ -32,7 +32,7 @@ class TestACHFileContents(TestCase):
         file_contents = ACHFileContents(
             FileHeaderRecordType(
                 destination_routing=123456780,
-                origin_routing=123456780,
+                origin_id=123456780,
                 destination_name="YOUR BANK",
                 origin_name="YOUR COMPANY",
                 file_creation_date="140902",
@@ -96,7 +96,7 @@ class TestACHFileContents(TestCase):
         ach_file_contents = ACHFileContentsParser(test_file).process_ach_file_contents()
         new_file_header = FileHeaderRecordType(
             destination_routing=123456780,
-            origin_routing=123456780,
+            origin_id=123456780,
             destination_name="YOUR BANK",
             origin_name="YOUR COMPANY",
             file_creation_date="140902",
