@@ -8,6 +8,10 @@ from ach.record_types import (
     BatchHeaderRecordType,
     EntryDetailRecordType,
 )
+from ach.record_types.record_fields import (
+    AlphaNumFieldType,
+    BlankPaddedRoutingNumberFieldType,
+)
 from ach.constants import AutoDateInput, BatchStandardEntryClassCode, TransactionCode
 from tests import test_file
 
@@ -595,3 +599,66 @@ class TestACHFileBuilder(TestCase):
                     ],
                 }
             )
+
+    def test_ach_file_builder_for_custom_field_definition(self):
+        """Tests to ensure use case for 10-digit file header odfi identification field is met."""
+        self.ach_file_builder_class.file_header_record_type_class.field_definition_dict[
+            "origin_routing"
+        ].field_type = AlphaNumFieldType
+        b = self.ach_file_builder_class(
+            destination_routing="012345678",
+            origin_routing="1234567890",
+            destination_name="YOUR BANK",
+            origin_name="YOUR COMPANY",
+        )
+        b.add_batch(
+            company_name="YOUR COMPANY",
+            company_identification="1234567890",
+            company_entry_description="Test",
+            effective_entry_date=AutoDateInput.TOMORROW,
+            standard_entry_class_code=BatchStandardEntryClassCode.CCD,
+        )
+        b.add_entries_and_addendas(
+            [
+                {
+                    "transaction_code": TransactionCode.CHECKING_CREDIT,
+                    "rdfi_routing": "123456789",
+                    "rdfi_account_number": "65656565",
+                    "amount": "300",
+                    "individual_name": "Janey Test",
+                },
+                {
+                    "transaction_code": 27,
+                    "rdfi_routing": "123456789",
+                    "rdfi_account_number": "65656565",
+                    "amount": "300",
+                    "individual_name": "Janey Test",
+                    "addendas": [
+                        {
+                            "payment_related_information": "Reversing the last transaction pls and thx"
+                        },
+                    ],
+                },
+                {
+                    "transaction_code": 22,
+                    "rdfi_routing": "023456789",
+                    "rdfi_account_number": "45656565",
+                    "amount": "7000",
+                    "individual_name": "Mackey Shawnderson",
+                    "addendas": [
+                        {"payment_related_information": "Where's my money"},
+                    ],
+                },
+            ]
+        )
+        parser = ACHFileContentsParser(b.render())
+        ach_file_contents = parser.process_ach_file_contents(
+            parser.process_records_list()
+        )
+        self.assertEqual(b.render(), ach_file_contents.render_file_contents())
+        self.assertDictEqual(
+            b.ach_file_contents.render_json_dict(), ach_file_contents.render_json_dict()
+        )
+        self.ach_file_builder_class.file_header_record_type_class.field_definition_dict[
+            "origin_routing"
+        ].field_type = BlankPaddedRoutingNumberFieldType

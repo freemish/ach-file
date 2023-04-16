@@ -22,6 +22,14 @@ class NoBatchForTransactionError(Exception):
 class ACHFileBuilder:
     """Builds an ACHFileContents object."""
 
+    ach_file_contents_class = ACHFileContents
+    ach_batch_class = ACHBatch
+    ach_transaction_entry_class = ACHTransactionEntry
+    file_header_record_type_class = FileHeaderRecordType
+    batch_header_record_type_class = BatchHeaderRecordType
+    entry_detail_record_type_class = EntryDetailRecordType
+    addenda_record_type_class = AddendaRecordType
+
     def __init__(self, **file_settings):
         """
         Accepts a dict of file settings.
@@ -45,8 +53,8 @@ class ACHFileBuilder:
                 origin_name='YOUR FINANCIAL INSTITUTION',
             )
         """
-        self.ach_file_contents: ACHFileContents = ACHFileContents(
-            FileHeaderRecordType(**file_settings)
+        self.ach_file_contents: ACHFileContents = self.ach_file_contents_class(
+            self.file_header_record_type_class(**file_settings)
         )
         self.default_odfi_identification: str = file_settings.get(
             "origin_routing", ""
@@ -74,7 +82,7 @@ class ACHFileBuilder:
         """
         self._update_batch_settings(batch_settings)
         self.ach_file_contents.add_batch(
-            ACHBatch(BatchHeaderRecordType(**batch_settings))
+            self.ach_batch_class(self.batch_header_record_type_class(**batch_settings))
         )
         return self
 
@@ -174,7 +182,7 @@ class ACHFileBuilder:
     ) -> ACHTransactionEntry:
         addenda_list_kwargs = self._update_entry_detail_kwargs(entry_details)
 
-        entry_record = EntryDetailRecordType(**entry_details)
+        entry_record = self.entry_detail_record_type_class(**entry_details)
         addenda_records = []
 
         for i, addenda_kwargs in enumerate(addenda_list_kwargs):
@@ -183,9 +191,9 @@ class ACHFileBuilder:
                 entry_details.get("trace_sequence_number"),
                 addenda_sequence_num=i + 1,
             )
-            addenda_records.append(AddendaRecordType(**addenda_kwargs))
+            addenda_records.append(self.addenda_record_type_class(**addenda_kwargs))
 
-        return ACHTransactionEntry(entry_record, addenda_records)
+        return self.ach_transaction_entry_class(entry_record, addenda_records)
 
     def _update_entry_detail_kwargs(
         self, entry_details: Dict[str, Any]
@@ -219,8 +227,9 @@ class ACHFileBuilder:
             if k not in addenda_kwargs:
                 addenda_kwargs[k] = val
 
-    @staticmethod
+    @classmethod
     def get_file_setting_fields(
+        cls,
         only_required: bool = False,
     ) -> Dict[str, FieldDefinition]:
         """
@@ -228,43 +237,53 @@ class ACHFileBuilder:
         If only_required, returns only keywords that need to be set.
         """
         if only_required:
-            return FileHeaderRecordType.get_required_kwargs()
-        return FileHeaderRecordType.field_definition_dict
+            return cls.file_header_record_type_class.get_required_kwargs()
+        return cls.file_header_record_type_class.field_definition_dict
 
-    @staticmethod
-    def get_batch_fields(only_required: bool = False) -> Dict[str, FieldDefinition]:
+    @classmethod
+    def get_batch_fields(
+        cls, only_required: bool = False
+    ) -> Dict[str, FieldDefinition]:
         """
         Returns kwargs to pass into init.
         If only_required, returns only keywords that need to be set.
         """
         if only_required:
-            required_kwargs = dict(BatchHeaderRecordType.get_required_kwargs())
+            required_kwargs = dict(
+                cls.batch_header_record_type_class.get_required_kwargs()
+            )
             required_kwargs.pop("odfi_identification")
             required_kwargs.pop("batch_number")
             return required_kwargs
-        return BatchHeaderRecordType.field_definition_dict
+        return cls.batch_header_record_type_class.field_definition_dict
 
-    @staticmethod
-    def get_entry_fields(only_required: bool = False) -> Dict[str, FieldDefinition]:
+    @classmethod
+    def get_entry_fields(
+        cls, only_required: bool = False
+    ) -> Dict[str, FieldDefinition]:
         """
         Returns kwargs to pass into init.
         If only_required, returns only keywords that need to be set.
         """
         if only_required:
-            required_kwargs = dict(EntryDetailRecordType.get_required_kwargs())
+            required_kwargs = dict(
+                cls.entry_detail_record_type_class.get_required_kwargs()
+            )
             required_kwargs.pop("trace_odfi_identifier")
             required_kwargs.pop("trace_sequence_number")
             return required_kwargs
-        return EntryDetailRecordType.field_definition_dict
+        return cls.entry_detail_record_type_class.field_definition_dict
 
-    @staticmethod
-    def get_addenda_fields(only_required: bool = False) -> Dict[str, FieldDefinition]:
+    @classmethod
+    def get_addenda_fields(
+        cls, only_required: bool = False
+    ) -> Dict[str, FieldDefinition]:
         """
         Returns kwargs to pass into init.
         If only_required, returns only keywords that need to be set.
         """
         if only_required:
-            required_kwargs = dict(AddendaRecordType.get_required_kwargs())
+            required_kwargs = dict(cls.addenda_record_type_class.get_required_kwargs())
             required_kwargs.pop("entry_detail_sequence_number")
             return required_kwargs
-        return AddendaRecordType.field_definition_dict
+        return cls.addenda_record_type_class.field_definition_dict
