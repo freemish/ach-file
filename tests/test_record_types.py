@@ -154,7 +154,7 @@ class TestBatchHeaderRecordType(TestCase):
         self.assertEqual(len(record_line), 94)
         self.assertEqual(
             record_line,
-            "5200Teeniest Fintech                    0000000123PPDPayday          221023   1012345670000002",
+            "5200Teeniest Fintech                    123       PPDPayday          221023   1012345670000002",
         )
 
 
@@ -214,7 +214,7 @@ class TestBatchControlRecordType(TestCase):
         self.assertEqual(len(record_line), 94)
         self.assertEqual(
             record_line,
-            "820000000200000005430000000001000000000000000000000123                         123456780000001",
+            "82000000020000000543000000000100000000000000123                                123456780000001",
         )
 
 

@@ -35,7 +35,7 @@ class BatchControlRecordType(RecordType):
             "Total Credit Amount", IntegerFieldType, length=12
         ),
         "company_identification": FieldDefinition(
-            "Company Identification", IntegerFieldType, length=10
+            "Company Identification", AlphaNumFieldType, length=10
         ),
         "message_authentication_code": FieldDefinition(
             "Message Authentication Code", AlphaNumFieldType, length=19, required=False

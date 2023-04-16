@@ -15,7 +15,7 @@ from ach.constants import AutoDateInput, BatchStandardEntryClassCode, Transactio
 
 b = ACHFileBuilder(
     destination_routing='012345678',
-    origin_routing='102345678',
+    origin_id='1234567890', #your company ID in this field
     destination_name='YOUR BANK',
     origin_name='YOUR FINANCIAL INSTITUTION',
 )
@@ -81,7 +81,7 @@ Below are tables describing all of the valid input arguments for the callables i
 |record_type_code|IntegerFieldType|True|1|
 |priority_code|IntegerFieldType|True|1|
 |destination_routing|BlankPaddedRoutingNumberFieldType|True|None|
-|origin_routing|BlankPaddedRoutingNumberFieldType|True|None|
+|origin_id|AlphaNumFieldType|True|None|
 |file_creation_date|DateFieldType|True|"NOW"|
 |file_creation_time|TimeFieldType|False|None|
 |file_id_modifier|AlphaNumFieldType|True|"A"|
@@ -100,7 +100,7 @@ Below are tables describing all of the valid input arguments for the callables i
 |service_class_code|IntegerFieldType|True|200|
 |company_name|AlphaNumFieldType|True|None|
 |company_discretionary_data|AlphaNumFieldType|False|None|
-|company_identification|IntegerFieldType|True|None|
+|company_identification|AlphaNumFieldType|True|None|
 |standard_entry_class_code|AlphaNumFieldType|True|"PPD"|
 |company_entry_description|AlphaNumFieldType|True|None|
 |company_descriptive_date|DateFieldType|False|None|
