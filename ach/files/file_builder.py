@@ -57,7 +57,7 @@ class ACHFileBuilder:
             self.file_header_record_type_class(**file_settings)
         )
         self.default_odfi_identification: str = file_settings.get(
-            "origin_routing", ""
+            "destination_routing", ""
         ).lstrip()[:8]
 
     def render(self, line_break: str = "\n", end: str = "\n") -> str:
