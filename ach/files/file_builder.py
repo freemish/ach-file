@@ -39,7 +39,7 @@ class ACHFileBuilder:
 
             settings_dict = {
                 'destination_routing': '012345678',
-                'origin_routing': '102345678',
+                'origin_id': '102345678',
                 'destination_name': 'YOUR BANK',
                 'origin_name': 'YOUR FINANCIAL INSTITUTION',
                 'file_id_modifier': 'B',
@@ -48,7 +48,7 @@ class ACHFileBuilder:
 
             ACHFileBuilder(
                 destination_routing='012345678',
-                origin_routing='102345678',
+                origin_id='102345678',
                 destination_name='YOUR BANK',
                 origin_name='YOUR FINANCIAL INSTITUTION',
             )
