@@ -14,6 +14,7 @@ from .record_fields import (
     DateFieldType,
     FieldDefinition,
     IntegerFieldType,
+    IntegerFieldSpacePaddingType,
 )
 from .record_type_base import RecordType
 
@@ -40,7 +41,7 @@ class BatchHeaderRecordType(RecordType):
             "Company Discretionary Data", AlphaNumFieldType, length=20, required=False
         ),
         "company_identification": FieldDefinition(
-            "Company Identification Number", IntegerFieldType, length=10
+            "Company Identification Number", IntegerFieldSpacePaddingType, length=10
         ),
         "standard_entry_class_code": FieldDefinition(
             "Standard Entry Class Code",
