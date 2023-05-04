@@ -184,6 +184,15 @@ class AlphaNumFieldType(FieldType):
             return input_string
         return re.sub(re.compile(r"[^A-Za-z0-9./()&\'\s-]"), "", input_string)
 
+class IntegerFieldSpacePaddingType(FieldType):
+    """Represents an integer field type. Pads number strings with leading 0s."""
+
+    padding: str = " "
+    alignment: Alignment = Alignment.RIGHT
+    regex: re.Pattern = re.compile(r"^\d+$")
+    auto_correct: bool = False
+
+
 
 class BlankPaddedRoutingNumberFieldType(IntegerFieldType):
     """Represents a routing number padded with a leading blank space."""

@@ -18,6 +18,7 @@ from .record_fields import (
     TimeFieldType,
     FieldDefinition,
     IntegerFieldType,
+    IntegerFieldSpacePaddingType,
 )
 from .record_type_base import RecordType
 
@@ -46,7 +47,7 @@ class FileHeaderRecordType(RecordType):
         ),
         "origin_id": FieldDefinition(
             "Immediate Origin Routing or Company ID",
-           AlphaNumFieldType,
+           IntegerFieldSpacePaddingType,
             length=10,
         ),
         "file_creation_date": FieldDefinition(
